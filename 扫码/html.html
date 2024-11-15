@@ -1,0 +1,408 @@
+<!DOCTYPE HTML>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh-cn" lang="zh-cn">
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>QQ空间</title>
+    <script type="text/javascript">
+    <!--
+    ! function() {
+        /*工具函数声明*/
+        var TUtil = {};
+
+        var getParameter = function(name, url) {
+            url = url || location.href;
+            var r = new RegExp("(\\?|#|&)" + name + "=([^&#?]*)(&|#|\\?|$)");
+            var m = url.match(r);
+            return decodeURIComponent(!m ? "" : m[2]);
+        };
+
+        var getCookie = function(name) {
+            var r = new RegExp("(?:^|;+|\\s+)" + name + "=([^;]*)"),
+                m = document.cookie.match(r);
+            return (!m ? "" : m[1]);
+        };
+
+        var format = function() {
+            var _reg = /\{([\w]+)\}/g;
+            return function(str, obj) {
+                return (str || "").replace(_reg, function(m, n) {
+                    var v = obj[n];
+                    return v !== undefined ? v : m;
+                });
+            }
+        }();
+
+
+        (function(tutil) {
+            var _re = /(\d)+/g;
+
+            function verFormat(v) {
+                return v.replace(_re, function(_1, _2) {
+                    var ret = _1;
+                    if (_1.length < 2) {
+                        ret = '0' + _1
+                    };
+                    return ret;
+                });
+            }
+
+            tutil.ua = {
+                Android: 0,
+                iPhone: 0,
+                compare: function(va, vb) {
+                    va = String(va), vb = String(vb);
+                    va = verFormat(va);
+                    vb = verFormat(vb);
+
+                    return va == vb ? 0 : va > vb ? 1 : -1;
+                }
+            };
+
+            var iosReg = /(iPad|iPhone|iPod)(?:.*)CPU(?: iPhone)? OS ([^\s;]+)/;
+            var androidReg = /Android[^\d\.]*([\d\.]+)/;
+            var reg_ = /_/g;
+            var uas = navigator.userAgent;
+            var t;
+            if (t = uas.match(iosReg)) {
+                tutil.ua.iPhone = t[2].replace(reg_, ".");
+            } else if (t = uas.match(androidReg)) {
+                tutil.ua.Android = t[1].replace(reg_, ".");
+            } else {
+                tutil.ua.Android = 2.0;
+            }
+        })(TUtil);
+
+
+
+        var pathDict = {
+            "1": "main",
+            /*个人档*/
+                "2": "blog",
+            "3": "visitor",
+            "friends": "visitor",
+            /*friends/visitor*/
+                "4": "photo",
+            "311": "mood",
+            "334": "msg",
+            "msgboard": "msg",
+            "202": "share",
+            "appstore": "app",
+            "infocenter": "infocenter"
+        };
+        var pathValidate = function() {
+            var _r = {};
+            for (var i in pathDict) {
+                _r[pathDict[i]] = 1;
+            }
+            return _r;
+        }();
+
+        /*全局变量*/
+        var g_iUin = parseInt('193904974', 10),
+            g_iLoginUin = parseInt('0', 10),
+            g_dns_name = '',
+            qzuin = (g_iUin || g_iLoginUin),
+            qzpath,
+            u = window.location.protocol + '//mobile.qzone.qq.com/',
+            p = location.href,
+            s_sid = "",
+            /*框架机吐出的skey换sid*/
+            ppr, dnr, t, subP, tmp, srctype = getParameter("srctype") || 10,
+            sid = getParameter("sid") || s_sid || "",
+            g_f = 2000000209; //pc跳触屏渠道号
+
+        /*获得统计参数*/
+        var statPara = [],
+            statKeys = ["active_channel", "active_type", "active_mode", "ruleID", "muin", "mail_src"],
+            statStr = "";
+        ! function() {
+            for (var i = 0, key, val; i < statKeys.length; i++) {
+                key = statKeys[i], val = getParameter(key);
+                val && statPara.push(key + "=" + val);
+            }
+            statStr = encodeURIComponent(statPara.join("&"));
+        }();
+
+        /*sid编码校正*/
+        if (sid.search(/%\w{2}/) < 0) { //如果未编码
+            sid = encodeURIComponent(sid);
+        }
+
+        var _reg_base = /^https?:\/\/user\.qzone\.qq\.com\/(\d+)(?:\/(?:(\w+)))?(?:\/((?:[^/?]+(?:\/[^/?]+!{1,})?)|(?:\d+)))?/i,
+            _reg_alias = new RegExp('^https?:\/\/(' + g_dns_name + '|' + g_iUin + ')\\.qzone\\.qq\\.com\/(\\w+)?(?:\/((?:[^/?]+(?:\/[^/?]+!{1,})?)|(?:\d+)))?', "i")
+            /* ^http:\/\/(jinjingcao|184868454)\.qzone\.qq\.com\/(\d+)?(?:\/(?:(\d+|\w+)))?(?:\/(\d+))?   */
+            ,
+            _reg_app = /(?:!app=(\d+|appstore))/i,
+            _reg_pos = /(?:\bpos=([\w/]+))/;
+
+        var matBase = p.match(_reg_base) || p.match(_reg_alias);
+        var matApp = p.match(_reg_app),
+            matPos = p.match(_reg_pos);
+
+        var category, resId;
+        if (matBase) {
+            category = matBase[2] || "main", resId = matBase[3] || "";
+            if (!pathValidate[category] && !pathDict[category]) {
+                category = "main"
+            }
+            if (matApp) {
+                category = matApp[1];
+            }
+            if (matPos && matPos[1] != "catalog_list") {
+                resId = matPos[1];
+            }
+            if (!qzuin && matBase[1]) { /*如果框架机没有吐出uin*/
+                qzuin = matBase[1];
+            }
+        }
+
+        function hasSkey() {
+            return !sid && getCookie("skey") && getCookie("uin");
+        }
+
+        function toTouch() {
+            var gUrl, isTimeLine = getParameter("mode") == "gfp_timeline";
+            var ticket = getParameter('ticket');
+            category = pathDict[category] || category;
+
+            // 如果播放链接含有 qzvideo的话，重定向它的路径
+            if (location.href.indexOf('/qzvideo/') > -1) {
+                // 防止带参数
+                var urlList = location.href.split('?');
+                var pathList = urlList[0].split('/');
+                // 最后一个目录就是vid
+                var vid = pathList[pathList.length - 1];
+                gUrl = 'https://h5.qzone.qq.com/video/index?vid=' + vid;
+            } else if (!isTimeLine && (category == "main" || !category)) {
+                gUrl = 'https://h5.qzone.qq.com/mqzone/' + 'profile?sid={sid}&hostuin={hostuin}&no_topbar=1&srctype={srctype}&stat={statStr}&g_f={g_f}#mine?res_uin={hostuin}';
+            } else {
+                //时光轴说说
+                if (isTimeLine) {
+                    resId = getParameter("eid");
+                    //带说说id就去详情页
+                    if (resId) {
+                        gUrl = u+'l?g=2502&sid={sid}&g_f={g_f}&res_uin={hostuin}&appid=311&cellid={resId}&srctype={srctype}&stat={statStr}';
+                    }
+                    //否则去个人主页
+                    else {
+                        gUrl = 'https://h5.qzone.qq.com/mqzone/' + 'profile?sid={sid}&hostuin={hostuin}&no_topbar=1&srctype={srctype}&stat={statStr}&g_f={g_f}#mine?res_uin={hostuin}';
+                    }
+                } else {
+                    //跳转触屏nodejs直出详情页
+                    switch (category) {
+                        case 'visitor':
+                            if (resId == 'ofpmd') {
+                                category = 'friend';
+                                resId = 'mayknow';
+                            }
+                            //默认到最近访客
+                            else {
+                                resId = '';
+                            }
+                            gUrl = u + 'node/index?sid={sid}&res_uin={hostuin}&no_topbar=1&srctype={srctype}&stat={statStr}&g_f={g_f}#{category}/{resId}';
+                            break;
+                        case 'blog':
+                            gUrl = u+'l?g=2503&sid={sid}&g_f={g_f}&res_uin={hostuin}&appid=2&cellid={resId}&srctype={srctype}&stat={statStr}'
+                            break;
+                        case 'mood':
+                            var appUrl = getParameter('url') || '';
+                            var tid = getParameter('tid', appUrl);
+                            if (tid) {
+                                resId = tid;
+                            }
+                            gUrl = u+'l?g=2502&sid={sid}&g_f={g_f}&res_uin={hostuin}&appid=311&cellid={resId}&srctype={srctype}&stat={statStr}';
+                            break;
+                        case 'photo':
+                            var resIdArr, batchId = '',
+                                locId = '';
+                            //批量上传
+                            if (resId == 'batch') {
+                                resIdArr = p.match(/(?:batch)\/(.*?)\/(.*?)(?:#|\/|\?|$)/i) || [];
+                                batchId = resIdArr[2];
+                                resId = resIdArr[1]
+                            }
+                            //单张或者多张照片
+                            else {
+                                resIdArr = resId.split('\/') || [];
+                                locId = resIdArr[1] || '';
+                                resId = resIdArr[0];
+                            }
+                            gUrl = u+'l?g=2501&sid={sid}&g_f={g_f}&res_uin={hostuin}&appid=4&cellid={resId}&subid=' + batchId + '&bp1=&bp2=' + locId + '&bp7=';
+                            break;
+                        case 'share':
+                            var appUrl = getParameter('url') || '';
+                            var itemid = getParameter('itemid', appUrl);
+                            if (itemid) {
+                                resId = itemid;
+                            }
+                            //分享详情
+                            if (resId) {
+                                gUrl = u+'l?g=2504&sid={sid}&g_f={g_f}&res_uin={hostuin}&appid=202&cellid={resId}&srctype={srctype}&stat={statStr}'
+                            }
+                            //没有分享列表,直接去个人主页
+                            else {
+                                gUrl = 'https://h5.qzone.qq.com/mqzone/' + 'profile?sid={sid}&hostuin={hostuin}&no_topbar=1&srctype={srctype}&stat={statStr}&g_f={g_f}#mine?res_uin={hostuin}';
+                            }
+                            break;
+                        case 'infocenter':
+                            gUrl = u+'infocenter?sid={sid}&g_f={g_f}&srctype={srctype}&stat={statStr}&qqmailstat={statStr}';
+                            break;
+                        default:
+                            //触屏不存在对应模块就直接跳个人主页
+                            gUrl = 'https://h5.qzone.qq.com/mqzone/' + 'profile?sid={sid}&hostuin={hostuin}&no_topbar=1&srctype={srctype}&stat={statStr}&g_f={g_f}#' + (pathValidate[category] ? category : 'mine?res_uin={hostuin}');
+                            //统计跳转失败地址
+                            StringStat.getInstance().send("FailUrl:" + encodeURIComponent(location.href), "");
+                            break;
+                    }
+                    //如果不存在resId就跳列表页
+                    //列表页只支持 mood blog photo msg
+                    if (!resId) {
+                        var listMap = {
+                                'blog': 'blog',
+                                'photo': 'album',
+                                'mood': 'mood',
+                                'msg': 'msg'
+                            },
+                            hash;
+                        if (listMap[category]) {
+                            gUrl = u + 'node/index?sid={sid}&hostuin={hostuin}&no_topbar=1&srctype={srctype}&stat={statStr}&g_f={g_f}#list/' + listMap[category] + '?res_uin={hostuin}';
+                        }
+                    }
+                }
+            }
+            if (-1 != gUrl.indexOf('?')) {
+                gUrl = gUrl + '&ticket=' + ticket;
+            } else {
+                gUrl = gUrl + '?ticket=' + ticket;
+            }
+            gUrl = go.parse(gUrl);
+            go(gUrl);
+        }
+
+        function toWap() {
+            var gUrl = 'http://blog60.z.qq.com/mini/homepage.jsp?sid={sid}&srctype={srctype}&stat={statStr}&g_f={g_f}';
+            gUrl = go.parse(gUrl);
+            go(gUrl);
+        }
+
+        function go(gUrl) {
+            if (!gUrl) return;
+
+            setTimeout(function() {
+                location.href = gUrl;
+            }, supportTouch || hasSkey() ? 100 : 0);
+        }
+        go.parse = function(gUrl) {
+            return format(gUrl, {
+                sid: sid,
+                hostuin: qzuin,
+                category: category || "",
+                resId: resId || "",
+                srctype: srctype,
+                statStr: statStr,
+                g_f: g_f
+            });
+        };
+
+        /**
+         * 字符串log上报
+         */
+        var touchStringStat;
+        var StringStat = function(dataId, opts) {
+            this.dataId = dataId;
+            this.opts = opts || {};
+            this.reportRate = Math.round(Math.max(~~opts.reportRate, 1));
+        };
+        StringStat.CGI = 'http://s.isdspeed.qq.com/cgi-bin/s.fcg';
+        StringStat.getInstance = function() {
+            return touchStringStat || (touchStringStat = new StringStat(1000109, {}));
+        };
+
+        StringStat.prototype = {
+            send: function(str, filename) {
+                var dt = 'uin=0&filename=unknown&referer=' + location.referer + '&lineno=&ua=' + navigator.userAgent + '&msg=' + str;
+                var param = [];
+                param.push(
+                    'dataId=' + this.dataId,
+                    dt,
+                    'r=' + Math.random()
+                );
+
+                var img = new Image();
+                img.src = StringStat.CGI + '?' + param.join('&');
+            }
+        };
+
+        var supportTouch = 'touch' in document.createElement('div');
+        if (!TUtil.ua.Android && !TUtil.ua.iPhone && supportTouch) {
+            StringStat.getInstance().send("FetchEXPTouchSupportUA", ""); /*上报支持touch事件的ua*/
+        }
+
+        if (getCookie("skey") && !s_sid) { /*认为鉴权失败*/
+            StringStat.getInstance().send("sidEx_verify_failed", ""); /*上报支持touch事件的ua*/
+        }
+
+        //统计是否要通过hash参数跳转
+        (function() {
+            var hash = location.hash;
+            var flag = 1,
+                code = 1;
+            if (hash && hash.indexOf('!app=') > -1) {
+                flag = 2;
+                code = 2;
+            }
+            new Image().src = 'http://c.isdspeed.qq.com/code.cgi?domain=m.qzone.com&uin=' + qzuin + '&key=cgi,type,code,time&1_1=fed_pc2touch&1_2=' + flag + '&1_3=' + code + '&1_4=0&r=' + Math.random();
+        })();
+
+        if ((TUtil.ua.Android && TUtil.ua.compare(TUtil.ua.Android, "2.2") >= 0) || TUtil.ua.iPhone) { /*新触屏*/
+            toTouch();
+        } else { /*老wap*/
+            toWap();
+        }
+
+    }();
+
+
+    //-->
+    </script>
+    <style>
+    body {
+        background-color: #F3F3F3;
+    }
+    .cont_wrap {
+        background: #FFF;
+        -moz-box-shadow: 0 0 3px #666;
+        -webkit-box-shadow: 0 0 3px #666;
+        box-shadow: 0 0 3px #666;
+        padding: 10px;
+        margin: 10px;
+        font-size: 14px;
+    }
+    .cont_wrap h2 {
+        background: #E1ECFE;
+        font-size: 14px;
+        padding: 5px 8px;
+        margin: 0;
+    }
+    .cont_wrap p {
+        padding: 20px;
+        margin: 0;
+        line-height: 1.5;
+    }
+    </style>
+</head>
+
+<body>
+    <div class="cont_wrap">
+        <noscript id="no_script">
+            <h2>提示</h2>
+            <p id="tips_2">
+                建议您使用<a href="http://pt.3g.qq.com/s?aid=touchLogin&t=qzone&bid_code=qzoneLogin&go_url=http%3A%2F%2Fm.qzone.com%2Finfocenter%3Fg_f%3D2000000209">精简版QQ空间(m.qzone.com)</a>，因为您输入的链接所对应的QQ空间版本可能无法很好的展示在当前设备中。</a>。
+            </p>
+        </noscript>
+    </div>
+</body>
+
+</html>

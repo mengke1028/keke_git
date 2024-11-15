@@ -1,0 +1,149 @@
+[
+    {
+        "domain": "su.ke.com",
+        "httpOnly": false,
+        "name": "srcid",
+        "path": "/",
+        "sameSite": "Lax",
+        "secure": false,
+        "value": "eyJ0Ijoie1wiZGF0YVwiOlwiY2QxYjA0MTQ5OWU0MWJmYmM2NjczNDEyYjFjYTNkZGJhMTgxMGJjZWI1YmJhYTUwNDEzMDI5MWFkMjhmMGY4N2NjODFmYTY2MzFjMDAyYTRiN2ZjMzBkOTk2MTlmOWU3YmEyN2I4ZTJjMmFjY2FkMWJlMTk3NjU1ZTE2NjllZWQzY2QxODVkMWVjYWViOTJiMjQ4ZWFjNjEwNDkyMGI3NjYxNjQ3YTgzOTI4YTlhMDAzZGY4NzhiY2ExNzY4ODU4OTIwMWNlMzI0MjQ2MWIwMGQ2MTc3ZDNiNTYxNmVkZGZlOWEyZGRiYzMyMWY2ODdhMDM1YmZkNWMwNDJmYjRmZlwiLFwia2V5X2lkXCI6XCIxXCIsXCJzaWduXCI6XCI5MzIwNzI2Y1wifSIsInIiOiJodHRwczovL3N1LmtlLmNvbS8/dXRtX3NvdXJjZT1iYWlkdSZ1dG1fbWVkaXVtPXBpbnpodWFuJnV0bV90ZXJtPWJpYW90aSZ1dG1fY29udGVudD1iaWFvdGltaWFvc2h1JnV0bV9jYW1wYWlnbj13eXN1emhvdSIsIm9zIjoid2ViIiwidiI6IjAuMSJ9"
+    },
+    {
+        "domain": ".ke.com",
+        "expiry": 1730432063,
+        "httpOnly": true,
+        "name": "login_ucid",
+        "path": "/",
+        "sameSite": "Lax",
+        "secure": false,
+        "value": "2000000144757586"
+    },
+    {
+        "domain": ".ke.com",
+        "httpOnly": false,
+        "name": "Hm_lpvt_b160d5571570fd63c347b9d4ab5ca610",
+        "path": "/",
+        "sameSite": "Lax",
+        "secure": false,
+        "value": "1729827265"
+    },
+    {
+        "domain": ".ke.com",
+        "expiry": 1764387264,
+        "httpOnly": false,
+        "name": "sensorsdata2015jssdkcross",
+        "path": "/",
+        "sameSite": "Lax",
+        "secure": false,
+        "value": "%7B%22distinct_id%22%3A%22192c1bce14e1a34-0c6d935b95943d-4c657b58-1296000-192c1bce14f1a6a%22%2C%22%24device_id%22%3A%22192c1bce14e1a34-0c6d935b95943d-4c657b58-1296000-192c1bce14f1a6a%22%2C%22props%22%3A%7B%22%24latest_traffic_source_type%22%3A%22%E4%BB%98%E8%B4%B9%E5%B9%BF%E5%91%8A%E6%B5%81%E9%87%8F%22%2C%22%24latest_referrer%22%3A%22%22%2C%22%24latest_referrer_host%22%3A%22%22%2C%22%24latest_search_keyword%22%3A%22%E6%9C%AA%E5%8F%96%E5%88%B0%E5%80%BC_%E7%9B%B4%E6%8E%A5%E6%89%93%E5%BC%80%22%2C%22%24latest_utm_source%22%3A%22baidu%22%2C%22%24latest_utm_medium%22%3A%22pinzhuan%22%2C%22%24latest_utm_campaign%22%3A%22wysuzhou%22%2C%22%24latest_utm_content%22%3A%22biaotimiaoshu%22%2C%22%24latest_utm_term%22%3A%22biaoti%22%7D%7D"
+    },
+    {
+        "domain": ".ke.com",
+        "expiry": 1729871999,
+        "httpOnly": false,
+        "name": "sajssdk_2015_cross_new_user",
+        "path": "/",
+        "sameSite": "Lax",
+        "secure": false,
+        "value": "1"
+    },
+    {
+        "domain": ".ke.com",
+        "expiry": 1730432063,
+        "httpOnly": false,
+        "name": "lianjia_token",
+        "path": "/",
+        "sameSite": "Lax",
+        "secure": false,
+        "value": "2.0013de626c72e5dcd202734b5d0085c9ca"
+    },
+    {
+        "domain": ".ke.com",
+        "expiry": 1761363263,
+        "httpOnly": true,
+        "name": "lfrc_",
+        "path": "/",
+        "sameSite": "Lax",
+        "secure": true,
+        "value": "0d24deea-8ece-4f66-a7e4-3c314b0282df"
+    },
+    {
+        "domain": ".ke.com",
+        "httpOnly": false,
+        "name": "HMACCOUNT",
+        "path": "/",
+        "sameSite": "Lax",
+        "secure": false,
+        "value": "71585A1152C080B4"
+    },
+    {
+        "domain": ".ke.com",
+        "expiry": 1729829065,
+        "httpOnly": false,
+        "name": "lianjia_ssid",
+        "path": "/",
+        "sameSite": "Lax",
+        "secure": false,
+        "value": "48eb6769-0c8e-4fd6-8bbe-3ba3fdcb76e6"
+    },
+    {
+        "domain": ".ke.com",
+        "expiry": 1761363264,
+        "httpOnly": false,
+        "name": "Hm_lvt_b160d5571570fd63c347b9d4ab5ca610",
+        "path": "/",
+        "sameSite": "Lax",
+        "secure": false,
+        "value": "1729827234"
+    },
+    {
+        "domain": ".ke.com",
+        "expiry": 1737603263,
+        "httpOnly": true,
+        "name": "ftkrc_",
+        "path": "/",
+        "sameSite": "Lax",
+        "secure": true,
+        "value": "7c53f95a-bc18-4119-9a6e-58c3ad340463"
+    },
+    {
+        "domain": ".ke.com",
+        "expiry": 1730432063,
+        "httpOnly": false,
+        "name": "security_ticket",
+        "path": "/",
+        "sameSite": "Lax",
+        "secure": false,
+        "value": "nm8Xn3rgphY2ZYQCglQLIc5bjjIe8KteVTK/RKqJ099jWBpU4WGERO/uZ77OJZfzUNSAuAX6xvEjonql4Q0ggmP3bbDuDiTMXA5cUr4IRTgJkL4LptFEgplKYlwFuZ8/l/yvITDqpgTmcHOWK0pAgZ1KtNXicz7+Ej7EUL+LqOI="
+    },
+    {
+        "domain": ".ke.com",
+        "expiry": 1730432063,
+        "httpOnly": false,
+        "name": "lianjia_token_secure",
+        "path": "/",
+        "sameSite": "None",
+        "secure": true,
+        "value": "2.0013de626c72e5dcd202734b5d0085c9ca"
+    },
+    {
+        "domain": ".ke.com",
+        "expiry": 1764387233,
+        "httpOnly": false,
+        "name": "lianjia_uuid",
+        "path": "/",
+        "sameSite": "Lax",
+        "secure": false,
+        "value": "f6e851d8-bc4b-4d04-be8c-7167fa6aedee"
+    },
+    {
+        "domain": ".ke.com",
+        "expiry": 1729913633,
+        "httpOnly": false,
+        "name": "select_city",
+        "path": "/",
+        "sameSite": "Lax",
+        "secure": false,
+        "value": "320500"
+    }
+]

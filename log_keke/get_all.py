@@ -5,3 +5,4 @@ try:
     addlog = log.addLog
 except:
     print('log setup failed!!!')
+1

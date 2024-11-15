@@ -6,3 +6,4 @@ try:
 except:
     print('log setup failed!!!')
 
+1

@@ -4,7 +4,6 @@ import requests
 from lxml import etree
 import csv
 
-
 # 随机获得ua
 def get_ua():
     first_num = random.randint(55, 62)

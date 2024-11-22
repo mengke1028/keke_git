@@ -10,6 +10,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="\金御华府成交.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="\魅力花园.csv">
           <value>
             <Attribute>

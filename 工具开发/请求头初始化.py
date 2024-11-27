@@ -33,27 +33,38 @@ if __name__ == "__main__":
     # 示例HTTP头部
     sample_headers = """
 accept:
-*/*
+text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
 accept-encoding:
 gzip, deflate, br, zstd
 accept-language:
-zh-CN,zh;q=0.9
-referer:
-https://quote.cngold.org/gjs/swhj_zghj.html
+zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6
+cache-control:
+max-age=0
+connection:
+keep-alive
+host:
+zyys.ihehang.com
+if-modified-since:
+Mon, 04 Nov 2024 09:57:42 GMT
 sec-ch-ua:
-"Google Chrome";v="131", "Chromium";v="131", "Not_A Brand";v="24"
+"Microsoft Edge";v="131", "Chromium";v="131", "Not_A Brand";v="24"
 sec-ch-ua-mobile:
 ?0
 sec-ch-ua-platform:
 "Windows"
 sec-fetch-dest:
-script
+document
 sec-fetch-mode:
-no-cors
+navigate
 sec-fetch-site:
-cross-site
+none
+sec-fetch-user:
+?1
+upgrade-insecure-requests:
+1
 user-agent:
-Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"""
+Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0
+"""
 
     # 调用函数并打印结果
     print(headers_to_json(sample_headers))

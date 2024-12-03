@@ -1,7 +1,6 @@
 import tkinter as tk
 from tkinter import scrolledtext
 import json
-import sys
 
 
 def headers_to_json(headers_str, separator=": "):
@@ -17,11 +16,9 @@ def headers_to_json(headers_str, separator=": "):
 
     # 按行分割输入字符串
     lines = headers_str.strip().split("\n")
-    for line in lines:
-        if line:  # 过虑空行
-            # 使用指定分隔符分割每一行
-            key, value = line.replace('"', '\'').split(separator, 1)
-            headers_dict[key] = value.strip()  # 移除可能存在的多余空白
+    for item, line in enumerate(lines):
+        if line[-1] == ':':
+            headers_dict[line[:-1]] = lines[int(item)+1].replace('"', "'")
 
     # 转换成JSON字符串
     return json.dumps(headers_dict, indent=4)
@@ -40,6 +37,7 @@ def clear_log(log_text):
 
 def on_log_button_click():
     """ 当点击日志按钮时调用此函数 """
+    log_text_2.delete(1.0, tk.END)
     test = log_text_1.get('1.0', tk.END)
     jsons = headers_to_json(test)
 

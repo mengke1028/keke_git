@@ -112,7 +112,7 @@ if __name__ == '__main__':
 
     window = tk.Tk()
     window.title("冒险岛脚本")
-    window.geometry("320x550")
+    window.geometry("320x330")
     window.geometry('+378+0')
 
     # 自定义样式
@@ -126,7 +126,7 @@ if __name__ == '__main__':
                     relief="solid")
 
     # 自动回血
-    item_label = ttk.Label(window, text="自动回血", font=("宋体", 10))
+    item_label = ttk.Label(window, text="自动回血1", font=("宋体", 10))
     item_label.grid(row=0, column=0, padx=10, pady=10, sticky=tk.W)
 
     huixue = tk.StringVar(value=400)
@@ -134,7 +134,7 @@ if __name__ == '__main__':
     item_entry.grid(row=0, column=1, padx=10, pady=10, sticky=tk.W)
 
     # 自动回蓝
-    target_price_label = ttk.Label(window, text="自动回蓝", font=("宋体", 10))
+    target_price_label = ttk.Label(window, text="自动回蓝2", font=("宋体", 10))
     target_price_label.grid(row=1, column=0, padx=10, pady=10, sticky=tk.W)
 
     default_value = tk.StringVar(value=200)
@@ -177,11 +177,11 @@ if __name__ == '__main__':
     jineng2 = ttk.Label(window, text="W技能随机延迟范围", font=("宋体", 10))
     jineng2.grid(row=5, column=0, padx=10, pady=10, sticky=tk.W)
 
-    W_value2 = tk.StringVar(value=0.5)
+    W_value2 = tk.StringVar(value=0.4)
     item_jineng2 = ttk.Entry(window, textvariable=W_value2, font=("宋体", 10), width=10)
     item_jineng2.grid(row=5, column=1, padx=10, pady=10, sticky=tk.W)
 
-    W_value2_1 = tk.StringVar(value=0.5)
+    W_value2_1 = tk.StringVar(value=0.6)
     item_jineng2_1 = ttk.Entry(window, textvariable=W_value2_1, font=("宋体", 10), width=10)
     item_jineng2_1.grid(row=5, column=2, padx=10, pady=10, sticky=tk.W)
 
@@ -189,11 +189,11 @@ if __name__ == '__main__':
     jineng3 = ttk.Label(window, text="E技能随机延迟范围", font=("宋体", 10))
     jineng3.grid(row=6, column=0, padx=10, pady=10, sticky=tk.W)
 
-    E_value2 = tk.StringVar(value=0.5)
+    E_value2 = tk.StringVar(value=0.4)
     item_jineng3 = ttk.Entry(window, textvariable=E_value2, font=("宋体", 10), width=10)
     item_jineng3.grid(row=6, column=1, padx=10, pady=10, sticky=tk.W)
 
-    E_value2_1 = tk.StringVar(value=0.5)
+    E_value2_1 = tk.StringVar(value=0.6)
     item_jineng3_1 = ttk.Entry(window, textvariable=E_value2_1, font=("宋体", 10), width=10)
     item_jineng3_1.grid(row=6, column=2, padx=10, pady=10, sticky=tk.W)
 

@@ -2,9 +2,7 @@
 # Keke.Meng  2025/1/7 10:45
 import tkinter as tk
 from tkinter import ttk
-import win32gui
 import win32con
-import win32api
 import pywintypes
 import win32gui
 
@@ -45,5 +43,4 @@ def callback():
 
 if __name__ == '__main__':
     window_title = callback()
-
-    set_window_transparency(window_title, 5)
+    set_window_transparency(window_title, 6)

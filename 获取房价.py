@@ -24,7 +24,7 @@ def get_ua():
 
 headers = {
     'user-agent': get_ua(),
-    "cookie": 'lianjia_uuid=0dbe3e5b-bc25-4f58-83e3-42b55c08927a; sensorsdata2015jssdkcross=%7B%22distinct_id%22%3A%2219348819e80136e-09597493b15782-26011851-1296000-19348819e811520%22%2C%22%24device_id%22%3A%2219348819e80136e-09597493b15782-26011851-1296000-19348819e811520%22%2C%22props%22%3A%7B%22%24latest_traffic_source_type%22%3A%22%E7%9B%B4%E6%8E%A5%E6%B5%81%E9%87%8F%22%2C%22%24latest_referrer%22%3A%22%22%2C%22%24latest_referrer_host%22%3A%22%22%2C%22%24latest_search_keyword%22%3A%22%E6%9C%AA%E5%8F%96%E5%88%B0%E5%80%BC_%E7%9B%B4%E6%8E%A5%E6%89%93%E5%BC%80%22%7D%7D; ftkrc_=ef68e88b-e429-4818-ba8a-8ff163eaaf49; lfrc_=95bdee9b-d773-45ab-a4f8-db9597827946; select_city=320500; lianjia_ssid=96f1d5fc-943c-4ad3-82a6-a19775892ada; crosSdkDT2019DeviceId=u8ko45-vtswrp-h82wsepcrkzt8zm-xk5rm69zg; login_ucid=2000000144757586; lianjia_token=2.001243c7957378792b03eeeea499335dd3; lianjia_token_secure=2.001243c7957378792b03eeeea499335dd3; security_ticket=GRTLwcakOW8fJs5a9X5YcHeat6HUcIUfEKjZ/ECnQogfkvPt4QU2Zkyf4+Cn7D5FTmXssR2ykxtmrZNT10Lh1p8YE8sGIiXxKFe4msM+85GMVxPX+ivUq8EVcIeC7hGfAq5lw/ryXpvwxnBNJPv2chlCZQTZN0KPYMmN2hnJqKs=; Hm_lvt_b160d5571570fd63c347b9d4ab5ca610=1738715062; Hm_lpvt_b160d5571570fd63c347b9d4ab5ca610=1738715062; HMACCOUNT=A534826F483F30F1; srcid=eyJ0Ijoie1wiZGF0YVwiOlwiYWUyYzU2OTEyZmI4MjExNzk1NmUzYTliNDRhOTk1N2I5ZTEyZGEwNjZjNjdjODk5MmU0ZDJiOTU4MDFlZjFiZGZmMDVmNzEzZDBkZDFjMzc3OTM0OTdiYWRhZDViMWQyMTYwMjlhZTg2MGJkN2I2YjM2Yjc0NDhkM2QwN2QyOGIyN2ZiZDljMDdkM2FhNTRhODAzOTg1YTg1Yjc4YmQwZjAxYjZlY2UyYTVjNGJiODkxZTg0YTlmNjU2NjI2NzA5M2M1YmYzOTk3MjYwMDdlZGRlZDU0ZWEzNDI5ZDkyNDNhZTE4YTAzZTY5MTU1NmUxNzgwN2NlMTUyYjYxNjRiZFwiLFwia2V5X2lkXCI6XCIxXCIsXCJzaWduXCI6XCIyY2FiYTQ5OFwifSIsInIiOiJodHRwczovL3N1LmtlLmNvbS9lcnNob3VmYW5nL3BnNWMyMzk4MjE4ODc5MjI5MjEvIiwib3MiOiJ3ZWIiLCJ2IjoiMC4xIn0='
+    "cookie": 'lianjia_uuid=0dbe3e5b-bc25-4f58-83e3-42b55c08927a; ftkrc_=ef68e88b-e429-4818-ba8a-8ff163eaaf49; lfrc_=95bdee9b-d773-45ab-a4f8-db9597827946; crosSdkDT2019DeviceId=u8ko45-vtswrp-h82wsepcrkzt8zm-xk5rm69zg; select_city=320500; Hm_lvt_b160d5571570fd63c347b9d4ab5ca610=1738715062,1739756401; HMACCOUNT=A534826F483F30F1; login_ucid=2000000144757586; lianjia_token=2.00155fc43e74647a8004f2ed0fa8cfa056; lianjia_token_secure=2.00155fc43e74647a8004f2ed0fa8cfa056; security_ticket=ZSXrjqCqlQw8F8QH7TmVRiwUhUlWeB0oR5mMyvBoQZD4rp/nle/nA6lkqMM60qPezMNtgDkehP6VpVB9maPlaCSK89rAoorlt2W4jK4agsGriFL1V4Wyk0Eaq/zGqbebcgy0m2KwK4TJtoCblYB3+ES0ypoFfAEtaOAoDyK4Kx0=; lianjia_ssid=3b8d46a0-403e-44b2-9407-07569c05caac; sensorsdata2015jssdkcross=%7B%22distinct_id%22%3A%2219348819e80136e-09597493b15782-26011851-1296000-19348819e811520%22%2C%22%24device_id%22%3A%2219348819e80136e-09597493b15782-26011851-1296000-19348819e811520%22%2C%22props%22%3A%7B%22%24latest_traffic_source_type%22%3A%22%E7%9B%B4%E6%8E%A5%E6%B5%81%E9%87%8F%22%2C%22%24latest_referrer%22%3A%22%22%2C%22%24latest_referrer_host%22%3A%22%22%2C%22%24latest_search_keyword%22%3A%22%E6%9C%AA%E5%8F%96%E5%88%B0%E5%80%BC_%E7%9B%B4%E6%8E%A5%E6%89%93%E5%BC%80%22%2C%22%24latest_utm_source%22%3A%22baidu%22%2C%22%24latest_utm_medium%22%3A%22pinzhuan%22%2C%22%24latest_utm_campaign%22%3A%22wysuzhou%22%2C%22%24latest_utm_content%22%3A%22biaotimiaoshu%22%2C%22%24latest_utm_term%22%3A%22biaoti%22%7D%7D; hip=Xzi6fei3rXA3pB7aAG8F3mETRsJf3QXfbds6fb0YHLT8DC6Njs5FOnIzHS13C6nF12dFf3NMM8yFtbBZfse74d0BdKgtbVO-Ru8OFqx9ou5ddv_2zlx63AXGj8qbt2e_p-iKfpLv_5RL5iQcU7wscid6ffmrJSSZhyd7_F09of4BKbIa200%3D; Hm_lpvt_b160d5571570fd63c347b9d4ab5ca610=1739758315; srcid=eyJ0Ijoie1wiZGF0YVwiOlwiYWUyYzU2OTEyZmI4MjExNzk1NmUzYTliNDRhOTk1N2I5YjRlZDI5Y2Q3Yzg3NDdlODQwMjZkMDEyMWUzMmNlOTBiYTg3YzZjNGZhNmQ5ZmNjZDQ5ODdjNDdlOGU0NWY3MjdkOWI2NWM1OTUxZTZiMDMxMWFkMDdkNzNkM2VkMWJkN2UwY2MzMzZkYzQxMmVjMDdhMmFhMzQ4ODQ5MmM1NTQ2NmYxYjk0MDY5NjlkNjZkMDRkOWFhZjc3YWI0YzU2YzM1M2M1NzFjMjc5MzRjZWQ5MDg4OGEzNDY1NTNlMjE3YWJmY2Q2MWViMzZmNGM1Y2E0NzY0Y2Q0MjVlYjZkNVwiLFwia2V5X2lkXCI6XCIxXCIsXCJzaWduXCI6XCJhNTcwODI0ZFwifSIsInIiOiJodHRwczovL3N1LmtlLmNvbS9lcnNob3VmYW5nL2MyMzk4MjE4ODc5MjMwMTUvP3N1Zz0lRTklODclOTElRTUlQkUlQTElRTUlOEQlOEUlRTUlQkElOUMiLCJvcyI6IndlYiIsInYiOiIwLjEifQ=='
 }
 
 
@@ -42,6 +42,7 @@ def get_jiage(xiaoqu):
         urls = f'https://su.ke.com/ershoufang/pg{u}{flog}/'
         # print(urls)
         res = requests.get(urls, headers=headers)
+        # print(res.text)
         res.encoding = res.apparent_encoding
         html = etree.HTML(res.text)
         # print(res.text)
@@ -80,6 +81,6 @@ def save_data(datas, xiaoqu):
 
 if __name__ == '__main__':
     # xiaoqu = "魅力花园"
-    for xiaoqu in ["魅力花园", "金御华府"]:
+    for xiaoqu in ["金御华府"]:
         datas = get_jiage(xiaoqu)
         save_data(datas, xiaoqu)

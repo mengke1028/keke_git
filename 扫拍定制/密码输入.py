@@ -1,8 +1,23 @@
 import tkinter as tk
 from tkinter import filedialog
+from ctypes import *
+import time
+import pyautogui
+import win32gui
+from huoyandatil import main
+
+dd_dll = windll.LoadLibrary('dd43390.dll')
+dd_dll.DD_btn(0)  # DD Initialize123
+
+
+def _set_pwd(pwd):
+    # 输入密码
+    for i in pwd:
+        dd_dll.DD_str(i, 1)
 
 
 def get_set_pwd(file_path):
+    '整理密码本'
     if file_path:
         try:
             # 读取文件所有行
@@ -15,7 +30,7 @@ def get_set_pwd(file_path):
                 print(f"文件第一行内容为: {first_line}")
 
                 # 要新增的行内容，这里示例为 'New line added'，你可以根据需求修改
-                new_line = '\n'+first_line
+                new_line = '\n' + first_line
                 lines.append(new_line)
 
                 # 将修改后的内容写回文件
@@ -33,22 +48,45 @@ def get_set_pwd(file_path):
     else:
         print("请先选择文件")
 
+
 def select_file():
+    # 选择密码路径
     file_path = filedialog.askopenfilename()
     if file_path:
         path_entry.delete(0, tk.END)
         path_entry.insert(0, file_path)
 
 
-def start_process():
-    # 获取密码
+def login():
+    """登录"""
     file_path = path_entry.get()
-    first_line = get_set_pwd(file_path)
+    first_line = get_set_pwd(file_path)  # 获取密码
     if first_line:
         result = first_line.split(',')
         qq = result[0]
         pwd = result[1]
+        # 查找 WeGame 窗口
+        wegame_window = win32gui.FindWindow(None, "WeGame")
+        if wegame_window:
+            # 将窗口移动到左上角
+            win32gui.MoveWindow(wegame_window, 0, 0, 800, 600, True)
 
+            # 激活 WeGame 窗口
+            win32gui.SetForegroundWindow(wegame_window)
+            time.sleep(1)  # 等待窗口激活
+
+            pyautogui.typewrite(qq)  # 输入qq
+            pyautogui.press('tab')  # 切换到密码输入框
+            time.sleep(0.5)
+            _set_pwd(pwd)  # 输入密码
+            pyautogui.press('enter')  # 切换到密码输入框
+            zuobiao = main(100, 200, 400, 400)  # x y 宽 长
+
+
+
+def start_process():
+    # 点击开始
+    login()
 
 
 # 创建主窗口

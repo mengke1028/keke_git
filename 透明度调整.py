@@ -37,10 +37,43 @@ def set_window_transparency(hwnd, transparency):
 
 def callback():
     window_title = win32gui.FindWindow(None, '雷电模拟器(64)')
+    window_title = win32gui.FindWindow(None, 'Microsoft Edge')
     print(window_title)
     return window_title
 
 
+import win32gui
+
+
+def get_edge_window_handle(leiming):
+    def callback(hwnd, hwnds):
+        # 获取窗口的标题
+        window_title = win32gui.GetWindowText(hwnd)
+        # print(window_title)
+        # 获取窗口的类名
+        window_class = win32gui.GetClassName(hwnd)
+        # 检查类名是否为 "Chrome_WidgetWin_1"（Edge 浏览器的类名）
+        if leiming == window_title:
+            hwnds.append(hwnd)
+        return True
+
+    hwnds = []
+    # 枚举所有顶级窗口
+    win32gui.EnumWindows(callback, hwnds)
+    return hwnds
+
+
 if __name__ == '__main__':
-    window_title = callback()
-    set_window_transparency(window_title, 6)
+    # # 调用函数获取 Edge 窗口句柄
+    leiming = '主力机'
+    edge_handles = get_edge_window_handle(leiming)
+    if edge_handles:
+        print(f"找到 {leiming}窗口句柄:")
+        for handle in edge_handles:
+            print(handle)
+            # set_window_transparency(handle, 50)
+    else:
+        print("未找到 Microsoft Edge 窗口。")
+
+    # window_title = callback()
+    set_window_transparency(3015824, 6)

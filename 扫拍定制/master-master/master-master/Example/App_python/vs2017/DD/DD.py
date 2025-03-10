@@ -1,48 +1,13 @@
-
-from ctypes import *
 import time
 
-print("Load DD!")
-
-dd_dll = windll.LoadLibrary('D:\keke\扫拍定制\master-master\master-master\dd.2024.07\dd.43390\dd43390.dll')
-time.sleep(2)
-
-st = dd_dll.DD_btn(0) #DD Initialize123
-
-# if st==1:
-#     print("OK")
-# else:
-#     print("Error")
-#     print(st)
-#     exit(101)
-time.sleep(1)
-for i in [201, 202, 203]:
-    dd_dll.DD_key(i, 1)
-    dd_dll.DD_key(i, 2)
-
-# print("Keyboard Left win")123
-# #LWin is 601 in ddcode, 1=down, 2=up.
-# dd_dll.DD_key(601, 1)
-# dd_dll.DD_key(601, 2)
-# time.sleep(2)123
-#
-# print("Mouse move abs.")
-# dd_dll.DD_mov(200, 200)
-# time.sleep(2)
-#
-# print("Mouse move rel.")
-# dd_dll.DD_movR(50, 50)
-# time.sleep(2)
-#
-# print("Mouse Right button ")
-# #1==L.down, 2==L.up, 4==R.down, 8==R.up, 16==M.down, 32==M.up
-# dd_dll.DD_btn(4)
-# dd_dll.DD_btn(8)
-# time.sleep(2)
-
-
-
-
-
-
+try:
+    # 以读取模式打开文件
+    with open('xinxi.txt', 'r', encoding='utf-8') as fp:
+        # 读取文件的所有内容
+        content = fp.readlines()
+        content = [line.strip() for line in content]
+        print(content)
+except FileNotFoundError:
+    print("指定的文件未找到，将创建新文件。")
+# 如果文件不存在或者 data 不在文件中，将 data 写入文件
 

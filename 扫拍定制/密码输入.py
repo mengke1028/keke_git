@@ -23,7 +23,7 @@ dd_dll = windll.LoadLibrary(r'tools\dd43390.dll')
 dd_dll.DD_btn(0)  # DD Initialize123
 import os
 
-if int(time.time()) < 1741598966:
+if int(time.time()) < 1741616097 + (24 * 60 * 60):
     pass
 else:
     exit()
@@ -57,7 +57,6 @@ jiageshangxian_shuru = None
 sousuocishu_shuru = None
 sousuoshijian_shuru = None
 CONFIG_FILE = "tools\config.json"
-yeshu = None
 
 
 def _set_pwd(pwd):
@@ -120,11 +119,11 @@ def login():
     file_path = path_entry.get()
     first_line = get_set_pwd(file_path)  # 获取密码
     with open('log.log', 'a', encoding='utf-8')as fp:
-        first_line = ','.join(first_line)
+        first_lines = ','.join(first_line)
         now = datetime.datetime.now()
         formatted_time = now.strftime("%Y-%m-%d %H:%M:%S")
         print(formatted_time)
-        data = str(formatted_time) + ' ,' + first_line + '\n'
+        data = str(formatted_time) + ' ,' + first_lines + '\n'
         fp.write(data)
     if first_line:
         result = first_line.split(',')
@@ -308,12 +307,12 @@ def stop_all():
 # 定义复选框被点击时的处理函数
 def on_checkbox_click():
     if check_var.get() == 1:
-        print("复选框被选中")
+        print("当前账号下线")
         stop_all()
         login()
     else:
         check_var.set(1)
-        print("复选框被取消选中")
+        print("当前账号不下线")
 
 
 def initsaopai():
@@ -332,11 +331,21 @@ def initsaopai():
         time.sleep(0.5)
 
 
+def get_time_now():
+    """获取当前时间 小时"""
+    current_hour = datetime.datetime.now().hour
+    print(current_hour)
+    return str(current_hour)
+
+
 def time_consuming_task():
-    global yeshu
+    dingshiguanji = str(guanji_shuru.get())  # 定时关机
+    xiuxishijian = str(shijian_shuru.get())  # 每日休息时间
+    xiusishichang = int(shichang_shuru.get())  # 休息时长
+
+    yeshu = None
     sousuocishu1 = sousuocishu_shuru.get()
     sousuoshijian1 = sousuoshijian_shuru.get()
-    start_button.config(text="暂停/Home")
     while True:
         # 扫拍
         on_checkbox_click()  # 当前角色下线
@@ -347,6 +356,11 @@ def time_consuming_task():
         for _ in range(int(sousuocishu1)):
             if stop_time < int(time.time()):
                 break
+            if dingshiguanji == get_time_now():
+                os.system("shutdown /s /t 0")
+                time.sleep(20)
+            if xiuxishijian == get_time_now():
+                time.sleep(xiusishichang*60*60)
             initsaopai()
             print('初始化完成')
 
@@ -360,7 +374,7 @@ def time_consuming_task():
             zuigao = jiankongjiage_shuru1.get()  # 最高价格
             cailiao_dizhi = cailiao.get()  # 材料保存路径
             jiangeshijian = jiange_shuru.get()
-
+            xiyou = combo_box2.get()
             guolv = [guolvjiage_shuru1.get(),
                      guolvjiage_shuru2.get(),
                      guolvjiage_shuru3.get(),
@@ -371,6 +385,7 @@ def time_consuming_task():
                      guolvjiage_shuru8.get()
                      ]
             guolv_list = [i for i in guolv if i != 0]
+            print(name)
             if name in ["设计图", "消耗品", '材料', "‘投掷/设置", "袖珍罐", "其他"]:
                 # try:
                 moren = find_image_in_region(571, 0, 798, 132, "img\默认.bmp", 0.98)
@@ -379,13 +394,14 @@ def time_consuming_task():
                     click2(moren[1], moren[2])
                     time.sleep(1)
                 yeshu = get_jiage(name, fanye24, fanye48, geshu, geshu1, zuidi, zuigao, guolv_list, yeshu,
-                                  cailiao_dizhi)
+                                  cailiao_dizhi, xiyou)
             time.sleep(int(jiangeshijian))
     # except Exception as e:
     #     print(e)
 
 
 def time_consuming_shangjia():
+    # 上架代码
     on_checkbox_click()  # 当前角色下线
     login()
     get_user()
@@ -396,7 +412,7 @@ def time_consuming_shangjia():
         # 上架
         if os.path.getsize(cailiao_dizhi) == 0:
             time.sleep(5)
-            print('没有东西')
+            print('没有要上架的东西')
             continue
         else:
             # 读取文件内容
@@ -427,8 +443,9 @@ def time_consuming_shangjia():
         click2(658, 89)  # 点击搜索
         time.sleep(2)
         leiming = combo_box1.get()  # 物品分类
+        screenshot2 = get_screenshot2(146, 140, 169, 154)  # 截取搜到的图
 
-        data_xy = find_shangjia(name, geshu, danjia, leiming)
+        data_xy = find_shangjia(name, geshu, danjia, leiming, screenshot2)
         # 开始上架
         shangjia(data_xy[1], leiming, geshu, jiage, shijian)
 
@@ -559,7 +576,9 @@ def start_process():
     task_thread = threading.Thread(target=time_consuming_task)
     # 启动线程
     task_thread.start()
+    start_button.config(text="暂停/Home")
     start_button.config(bg="#00FF00")
+    start_button.config(state=tk.DISABLED)
     save_config()
 
 
@@ -576,6 +595,7 @@ def stop():
     """停止"""
     ctypes.pythonapi.PyThreadState_SetAsyncExc(ctypes.c_long(task_thread.ident), ctypes.py_object(SystemExit))
     start_button.config(text="开始搜索", bg="#808080")
+    start_button.config(state=tk.NORMAL)
 
 
 def on_press(key):
@@ -605,7 +625,7 @@ if __name__ == '__main__':
 
     # 定义复选框的变量
     check_var = tk.IntVar()
-    checkbox = tk.Checkbutton(root, text="当前账号下线", variable=check_var)
+    checkbox = tk.Checkbutton(root, text="重新登录", variable=check_var)
     checkbox.grid(row=0, column=3, padx=5, pady=5)
 
     # 创建开始按钮，设置大小为 60x60 像素
@@ -659,7 +679,7 @@ if __name__ == '__main__':
 
     # 第四排############################################################
     # 定时关机
-    guanji = tk.Label(root, text="定时关机:")
+    guanji = tk.Label(root, text="定时关机(0-23):")
     guanji.grid(row=3, column=0, padx=5, pady=5)
     # 间隔时间输入框
     guanji_shuru = tk.Entry(root, width=20)
@@ -734,7 +754,7 @@ if __name__ == '__main__':
     guolvjiage_shuru8.insert(0, "0")  # 在输入框索引 0 的位置插入 "0"
     ############定时休息###########################################
 
-    shijian = tk.Label(root, text="休息时间（时）:")
+    shijian = tk.Label(root, text="休息时间（0-23）:")
     shijian.grid(row=8, column=0, padx=5, pady=5)
     shijian_shuru = tk.Entry(root, width=20)
     shijian_shuru.grid(row=8, column=1, padx=5, pady=5)

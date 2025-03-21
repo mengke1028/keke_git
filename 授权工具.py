@@ -87,7 +87,7 @@ class login:
 def submit_new_machine_code():
     machine_code = entry_machine_code.get()
     expiration_time = combo_expiration.get()
-    print(f"新机器码: {machine_code}, 到期时间: {expiration_time}")
+    print(f"新机器码: {machine_code}, 授权时长: {expiration_time}")
 
 
 def submit_replace_machine_code():

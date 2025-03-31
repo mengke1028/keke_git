@@ -7,26 +7,28 @@ import pyautogui
 from huoyandatil import get_xy
 import subprocess
 from libsall.点击在游戏生效 import click, click2
-from libsall.tools import find_image_in_region, Find_exit, mk_OCR  # 找图
+from libsall.tools import find_image_in_region  # 找图
 import win32gui
 import win32con
 from libsall.实现移动 import key_press
 from tkinter import ttk
-from libsall.get_cailiao import get_jiage, huoqujiage, find_24_2_25, Controller, find_shangjia, quxiaoshangjia, \
-    shangjia, chazhaobendi
+from libsall.get_cailiao import get_jiage, ShangJia,diaoxian
 import threading
 from pynput import keyboard
 import ctypes
 import datetime
+from datetime import datetime, timedelta
 
 dd_dll = windll.LoadLibrary(r'tools\dd43390.dll')
 dd_dll.DD_btn(0)  # DD Initialize123
-import os
+import os, requests
 
-if int(time.time()) < 1741616097 + (24 * 60 * 60):
-    pass
-else:
+
+
+res = requests.get(url='https://leve1.oss-cn-beijing.aliyuncs.com/01.txt')
+if res.status_code != 200:
     exit()
+
 path_entry = None
 check_var = None
 combo_box1 = None
@@ -63,7 +65,92 @@ def _set_pwd(pwd):
     # 输入密码
     for i in pwd:
         dd_dll.DD_str(i, 1)
+denglucishu = None  # 登录次数
 
+def read_pwd(file_path):
+    """读取密码本的数据"""
+    global denglucishu
+    if file_path:
+        try:
+            # 读取文件所有行
+            with open(file_path, 'r', encoding='utf-8') as fp:
+                lines = fp.readlines()
+                denglucishu = len(lines)
+                for line_num, line in enumerate(lines, start=1):
+                    first_line = line.strip().split(',')
+                    sousuocishu1 = sousuocishu_shuru.get()
+                    sousuoshijian1 = sousuoshijian_shuru.get()  # 搜索时间上限
+                    if first_line[4] == '0':
+                        if int(first_line[2]) < int(sousuocishu1) and int(first_line[3]) < int(sousuoshijian1):
+                            return first_line[:2], line_num
+                    else:
+                        continue
+                return None, None
+        except FileNotFoundError:
+            print("文件未找到，请检查文件路径。")
+        except Exception as e:
+            print(f"处理文件时出现错误: {e}")
+    else:
+        print("请先选择文件")
+new_file_name = None
+def update_mima(file_path, hanghao = 0, new_data=None):
+    """密码本日志"""
+    global new_file_name
+    adjusted_time = datetime.now() - timedelta(hours=6)
+    # 格式化调整后的时间
+    current_time = adjusted_time.strftime("%Y_%m_%d")
+    # 获取源文件的文件名和扩展名
+    file_name, file_extension = os.path.splitext(file_path)
+    # 构建新文件名
+    new_file_name = f"{file_name}_{current_time}{file_extension}"
+    print(new_file_name)
+
+    # 判断新文件是否存在，如果不存在则写入
+    if not os.path.exists(new_file_name):
+        with open(file_path, 'r', encoding='utf-8') as source_file:
+            with open(new_file_name, 'w', encoding='utf-8') as new_file:
+                for line in source_file:
+                    parts = line.strip().split(',')
+                    # 假设我们要补齐到 5 个字段
+                    while len(parts) < 5:
+                        parts.append('0')
+                    new_line = ','.join(parts) + '\n'
+                    new_file.write(new_line)
+        print(f"文件已成功复制为 {new_file_name}")
+    else:
+        if new_data is None:
+            return
+        else:
+            try:
+                new_lines = []
+                # 行号从 1 开始，索引从 0 开始，所以要减 1
+                target_index = hanghao
+                with open(new_file_name, 'r', encoding='utf-8') as read_file:
+                    for index, line in enumerate(read_file):
+                        if index == target_index:
+                            # 将新数据转换为逗号分隔的字符串
+                            new_data_str = ','.join(map(str, new_data))
+                            parts = line.strip().split(',')
+                            # 保留原有的前两组数据
+                            new_line = ','.join(parts[:2]) + ',' + new_data_str + '\n'
+                            new_lines.append(new_line)
+                        else:
+                            new_lines.append(line)
+                with open(new_file_name, 'w', encoding='utf-8') as write_file:
+                    write_file.writelines(new_lines)
+                print(f"文件 {new_file_name} 已存在，已覆盖第 {hanghao} 行的数据。")
+            except Exception as e:
+                print(f"错误: 编辑文件时发生未知错误: {e}")
+    return new_file_name
+
+def read_update(new_file_name,num):
+    """读取行号对应的 账号 信息"""
+    if new_file_name is not None:
+        with open(new_file_name, 'r', encoding='utf-8') as source_file:
+            for index, line in enumerate(source_file):
+                if index == num:
+                    parts = line.strip().split(',')
+                    return parts
 
 def get_set_pwd(file_path):
     """整理密码本"""
@@ -72,7 +159,6 @@ def get_set_pwd(file_path):
             # 读取文件所有行
             with open(file_path, 'r', encoding='utf-8') as fp:
                 lines = fp.readlines()
-
             if lines:
                 # 读取第一行
                 first_line = lines.pop(0).strip()
@@ -117,16 +203,10 @@ def cailiao_file():
 def login():
     """登录"""
     file_path = path_entry.get()
-    first_line = get_set_pwd(file_path)  # 获取密码
-    with open('log.log', 'a', encoding='utf-8')as fp:
-        first_lines = ','.join(first_line)
-        now = datetime.datetime.now()
-        formatted_time = now.strftime("%Y-%m-%d %H:%M:%S")
-        print(formatted_time)
-        data = str(formatted_time) + ' ,' + first_lines + '\n'
-        fp.write(data)
+    new_file_name = update_mima(file_path)  # 复制一个新的密码本
+    first_line, line_num = read_pwd(new_file_name)  # 获取密码
     if first_line:
-        result = first_line.split(',')
+        result = first_line
         qq = result[0]
         pwd = result[1]
         # 查找 WeGame 窗口
@@ -192,13 +272,14 @@ def login():
                         time.sleep(1)
                     click2(1781, 1002)
                     time.sleep(30)
+
                 else:
                     print("没有dnf图标")
                 return None
 
             else:
                 print("未找到 WeGame 窗口。")
-
+    return line_num
 
 def get_windo():
     """窗口移动到左上角"""
@@ -239,6 +320,7 @@ def get_user():
                 get_use = find_image_in_region(0, 1, 1920, 1080, 'img/选择角色特征.bmp', 0.98)
                 print(get_use)
                 if get_use != -1:
+                    get_set_pwd(path_entry.get())
                     time.sleep(5)
                     key_press("SPACE")
                     time.sleep(5)
@@ -303,16 +385,19 @@ def stop_all():
     os.system('taskkill /F /IM DNF.exe')
     time.sleep(3)
 
-
 # 定义复选框被点击时的处理函数
 def on_checkbox_click():
+    global line_num
     if check_var.get() == 1:
         print("当前账号下线")
         stop_all()
-        login()
+        line_num = login()
+        get_user()
+        return line_num
     else:
         check_var.set(1)
         print("当前账号不下线")
+        return line_num
 
 
 def initsaopai():
@@ -334,129 +419,129 @@ def initsaopai():
 def get_time_now():
     """获取当前时间 小时"""
     current_hour = datetime.datetime.now().hour
-    print(current_hour)
     return str(current_hour)
 
-
+line_num = None
 def time_consuming_task():
+    global line_num
     dingshiguanji = str(guanji_shuru.get())  # 定时关机
     xiuxishijian = str(shijian_shuru.get())  # 每日休息时间
     xiusishichang = int(shichang_shuru.get())  # 休息时长
 
     yeshu = None
-    sousuocishu1 = sousuocishu_shuru.get()
-    sousuoshijian1 = sousuoshijian_shuru.get()
+    sousuocishu1 = sousuocishu_shuru.get()  # 搜索次数上限
+    sousuoshijian1 = sousuoshijian_shuru.get()  # 搜索时间上限
+    #
+    # with open('xinxi.txt', 'w', encoding='utf-8') as fp:      # 清空材料库
+    #     pass
     while True:
         # 扫拍
-        on_checkbox_click()  # 当前角色下线
-        get_user()
+        line_num = on_checkbox_click()  # 当前角色下线
+        if line_num is None:
+            if get_time_now() == '10':
+                time.sleep(60)
+                continue
         get_windo()
         set_up_seting()
-        stop_time = int(time.time()) + (int(sousuoshijian1) * 24 * 60 * 60)
-        for _ in range(int(sousuocishu1)):
-            if stop_time < int(time.time()):
-                break
-            if dingshiguanji == get_time_now():
-                os.system("shutdown /s /t 0")
-                time.sleep(20)
-            if xiuxishijian == get_time_now():
-                time.sleep(xiusishichang*60*60)
-            initsaopai()
-            print('初始化完成')
+        t1 = int(time.time())
+        stop_time = t1 + (int(sousuoshijian1) * 24 * 60 * 60)
+        datas = read_update(new_file_name, line_num)
 
-            time.sleep(1)
-            name = combo_box1.get()  # 获取物品名称
-            fanye24 = fankanyeshu_24_shuru.get()  # 24小时翻页
-            fanye48 = fankanyeshu_48_shuru.get()  # 48小时翻页
-            geshu = cailiaogeshu_shuru.get()  # 材料个数上限
-            geshu1 = cailiaogeshu_shuru1.get()  # 材料个数上限
-            zuidi = jiankongjiage_shuru0.get()  # 最低价格
-            zuigao = jiankongjiage_shuru1.get()  # 最高价格
-            cailiao_dizhi = cailiao.get()  # 材料保存路径
-            jiangeshijian = jiange_shuru.get()
-            xiyou = combo_box2.get()
-            guolv = [guolvjiage_shuru1.get(),
-                     guolvjiage_shuru2.get(),
-                     guolvjiage_shuru3.get(),
-                     guolvjiage_shuru4.get(),
-                     guolvjiage_shuru5.get(),
-                     guolvjiage_shuru6.get(),
-                     guolvjiage_shuru7.get(),
-                     guolvjiage_shuru8.get()
-                     ]
-            guolv_list = [i for i in guolv if i != 0]
-            print(name)
-            if name in ["设计图", "消耗品", '材料', "‘投掷/设置", "袖珍罐", "其他"]:
-                # try:
-                moren = find_image_in_region(571, 0, 798, 132, "img\默认.bmp", 0.98)
-                if moren != -1:
-                    print("拍卖行打开")
-                    click2(moren[1], moren[2])
-                    time.sleep(1)
-                yeshu = get_jiage(name, fanye24, fanye48, geshu, geshu1, zuidi, zuigao, guolv_list, yeshu,
-                                  cailiao_dizhi, xiyou)
-            time.sleep(int(jiangeshijian))
-    # except Exception as e:
-    #     print(e)
+        for xxx in range(int(sousuocishu1)-int(datas[2])):
+            try:
+
+                if stop_time < int(time.time()):  # 到了换号时间
+                    break
+                if dingshiguanji == get_time_now():
+                    os.system("shutdown /s /t 0")
+                if xiuxishijian == get_time_now():
+                    time.sleep(xiusishichang * 60 * 60)
+                    break
+                initsaopai()
+                print('初始化完成')
+                time.sleep(1)
+                name = combo_box1.get()  # 获取物品名称
+                fanye24 = fankanyeshu_24_shuru.get()  # 24小时翻页
+                fanye48 = fankanyeshu_48_shuru.get()  # 48小时翻页
+                geshu = cailiaogeshu_shuru.get()  # 材料个数上限
+                geshu1 = cailiaogeshu_shuru1.get()  # 材料个数上限
+                zuidi = jiankongjiage_shuru0.get()  # 最低价格
+                zuigao = jiankongjiage_shuru1.get()  # 最高价格
+                cailiao_dizhi = cailiao.get()  # 材料保存路径
+                jiangeshijian = jiange_shuru.get() # 间隔时间
+                feidengjia1 = feidengjiashibie.get()  # 非等价
+
+                xiyou = combo_box2.get()
+                guolv = [guolvjiage_shuru1.get(),
+                         guolvjiage_shuru2.get(),
+                         guolvjiage_shuru3.get(),
+                         guolvjiage_shuru4.get(),
+                         guolvjiage_shuru5.get(),
+                         guolvjiage_shuru6.get(),
+                         guolvjiage_shuru7.get(),
+                         guolvjiage_shuru8.get()
+                         ]
+                guolv_list = [i for i in guolv if i != 0]
+                if name in ["设计图", "消耗品", '材料', "‘投掷/设置", "袖珍罐", "其他"]:
+                    # try:
+                    moren = find_image_in_region(571, 0, 798, 132, "img\默认.bmp", 0.98)
+                    if moren != -1:
+                        print("拍卖行打开")
+                        click2(moren[1], moren[2])
+                        time.sleep(1)
+                    yeshu = get_jiage(name, fanye24, fanye48, geshu, geshu1, zuidi, zuigao, guolv_list, yeshu,
+                                      cailiao_dizhi, xiyou, feidengjia1)
+                    if diaoxian:
+                        print('掉线了 重新登录')
+                        update_mima(file_path, line_num, [str(xxx),str(((int(time.time())-t1)/60)/60),'1'])
+                        break
+                    update_mima(file_path, line_num, [str(xxx), str(((int(time.time()) - t1) / 60) / 60), '1'])
+                    print('结束24h在', yeshu)
+                    datas = read_update(new_file_name, line_num)
+                    sousuocishu.config(text=f'搜索次数{datas[2]}')
+                time.sleep(int(jiangeshijian))
+            except Exception as e:
+                print(e)
+
 
 
 def time_consuming_shangjia():
-    # 上架代码
     on_checkbox_click()  # 当前角色下线
-    login()
     get_user()
     get_windo()
     set_up_seting()
     cailiao_dizhi = cailiao.get()  # 材料保存路径
+    dingshiguanji = str(guanji_shuru.get())  # 定时关机
     while True:
         # 上架
-        if os.path.getsize(cailiao_dizhi) == 0:
-            time.sleep(5)
-            print('没有要上架的东西')
-            continue
-        else:
-            # 读取文件内容
-            with open(cailiao_dizhi, 'r', encoding='utf-8') as fp:
-                data = fp.readline()
-                data_list = data.strip().split(',')
-                print(data_list)
+        try:
+            if dingshiguanji == get_time_now():
+                os.system("shutdown /s /t 0")
+            danjia = jiageshangxian_shuru.get()  # 一键购买单价
+            leiming = combo_box1.get()  # 物品分类
+            zuidageshu = shangjiageshu_shuru.get()  # 最上架个数
+            if os.path.getsize(cailiao_dizhi) == 0:
+                time.sleep(5)
+                print('没有东西')
+                continue
+            else:
+                # 读取文件内容
+                with open(cailiao_dizhi, 'r', encoding='utf-8') as fp:
+                    data_list = json.load(fp)
+                    print(data_list)
+                SJ = ShangJia(data_list, danjia, leiming, zuidageshu)
 
-            # 清空文件内容
-            with open(cailiao_dizhi, 'w', encoding='utf-8') as fp:
-                pass
-            print("文件内容已清空。")
-        name = data_list[0]
-        print(name)
-        geshu = data_list[1]
-        mingwang = data_list[2]
-        jiage = data_list[3]
-        shijian = data_list[4]
-        danjia = jiageshangxian_shuru.get()
-        key_press('ESC')
-        initsaopai()
-
-        # 根据名字搜到这个图片
-        click2(55, 89)
-        keyboard = Controller()
-        keyboard.type(name)
-        time.sleep(0.5)
-        click2(658, 89)  # 点击搜索
-        time.sleep(2)
-        leiming = combo_box1.get()  # 物品分类
-        screenshot2 = get_screenshot2(146, 140, 169, 154)  # 截取搜到的图
-
-        data_xy = find_shangjia(name, geshu, danjia, leiming, screenshot2)
-        # 开始上架
-        shangjia(data_xy[1], leiming, geshu, jiage, shijian)
-
-    # 打开已经上架的材料，看看有没有重复，有就下架 收邮件
-    # 查看背包里面这个材料有没有，数量是多少
-    # 如果不够就去一键购买收邮件
-    # 再找到这个物品，上架
-    # 上架后观察有没有超过20个如果超过了就回到第二页然后只留下10个 收邮件
-
-    pass
-
+                # 清空文件内容
+                with open(cailiao_dizhi, 'w', encoding='utf-8') as fp:
+                    pass
+                print("文件内容已清空。")
+            # 上架
+            SJ.run()
+            # 观察是否需要下架要求
+            SJ.xiajia()
+            time.sleep(1)
+        except Exception as e:
+            print(e)
 
 def save_config():
     config = {
@@ -574,6 +659,7 @@ def start_process():
     # 扫描
     # 创建线程
     task_thread = threading.Thread(target=time_consuming_task)
+    task_thread.daemon = True
     # 启动线程
     task_thread.start()
     start_button.config(text="暂停/Home")
@@ -584,10 +670,13 @@ def start_process():
 
 def start_shangjia():
     # 上架
-    task_thread = threading.Thread(target=time_consuming_shangjia)
+    global task_shangjia
+    task_shangjia = threading.Thread(target=time_consuming_shangjia)
     # 启动线程
-    task_thread.start()
-    shangjia_button.config(bg="#00FF00")
+    task_shangjia.daemon = True
+    task_shangjia.start()
+    shangjia_button.config(text="停止上架/END")
+    shangjia_button.config(bg="#00FF00", state=tk.DISABLED)
     save_config()
 
 
@@ -598,10 +687,25 @@ def stop():
     start_button.config(state=tk.NORMAL)
 
 
+def stop2():
+    ctypes.pythonapi.PyThreadState_SetAsyncExc(ctypes.c_long(task_shangjia.ident), ctypes.py_object(SystemExit))
+    shangjia_button.config(text="开始上架", bg="#808080")
+    shangjia_button.config(state=tk.NORMAL)
+
+
 def on_press(key):
     try:
         if key == keyboard.Key.home:
-            stop()
+            try:
+                stop()
+            except:
+                print('搜索还没开启呢')
+        if key == keyboard.Key.end:
+            try:
+                print(2222)
+                stop2()
+            except:
+                print('搜索还没开启呢')
     except AttributeError:
         pass
 
@@ -625,7 +729,7 @@ if __name__ == '__main__':
 
     # 定义复选框的变量
     check_var = tk.IntVar()
-    checkbox = tk.Checkbutton(root, text="重新登录", variable=check_var)
+    checkbox = tk.Checkbutton(root, text="需要登录", variable=check_var)
     checkbox.grid(row=0, column=3, padx=5, pady=5)
 
     # 创建开始按钮，设置大小为 60x60 像素
@@ -665,7 +769,7 @@ if __name__ == '__main__':
 
     # 第三排############################################################
     # 间隔时间
-    jiange = tk.Label(root, text="间隔时间:")
+    jiange = tk.Label(root, text="间隔时间（秒）:")
     jiange.grid(row=2, column=0, padx=5, pady=5)
     # 间隔时间输入框
     jiange_shuru = tk.Entry(root, width=20)
@@ -674,7 +778,7 @@ if __name__ == '__main__':
 
     # 定义复选框的变量
     feidengjiashibie = tk.IntVar()
-    checkbox2 = tk.Checkbutton(root, text="是否识别非等价", variable=feidengjiashibie)
+    checkbox2 = tk.Checkbutton(root, text="识别非等价", variable=feidengjiashibie)
     checkbox2.grid(row=2, column=3, padx=5, pady=5)
 
     # 第四排############################################################
@@ -785,7 +889,7 @@ if __name__ == '__main__':
     sousuocishu_shuru.grid(row=10, column=1, padx=5, pady=5)
     sousuocishu_shuru.insert(0, "1")  # 在输入框索引 0 的位置插入 "0"
 
-    sousuoshijian = tk.Label(root, text="搜索时间（/小时）:")
+    sousuoshijian = tk.Label(root, text="搜索时间（小时）:")
     sousuoshijian.grid(row=10, column=2, padx=5, pady=5)
     # 上限个数
     sousuoshijian_shuru = tk.Entry(root, width=20)
@@ -851,7 +955,9 @@ if __name__ == '__main__':
 
     # 加载配置
     load_config()
-
+    file_path = path_entry.get()
+    read_pwd(file_path)
+    update_mima(file_path)  # 复制一个新的密码本
     # 运行主循环
     # root.mainloop()
 

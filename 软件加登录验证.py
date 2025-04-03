@@ -3,6 +3,7 @@ from tkinter import ttk
 import tkinter as tk
 from tkinter import messagebox
 from 连接Mysql数据库 import MySQLDatabase
+import webbrowser
 
 
 # 预设的账号和密码
@@ -42,6 +43,10 @@ class UI:
         self.root.mainloop()
 
 
+def open_baidu(event):
+    webbrowser.open('https://68n.cn/n7oi0')
+
+
 class login(MySQLDatabase):
     def __init__(self):
         super().__init__()
@@ -67,15 +72,22 @@ class login(MySQLDatabase):
     def run(self):
         # 创建登录窗口
         self.login_window = tk.Tk()
-        self.login_window.title("登录")
+        self.login_window.title("购买+Q 193904974")
+        self.login_window.minsize(width=290, height=100)
 
         # 创建一个框架，用于组织登录控件
         login_frame = ttk.Frame(self.login_window, padding="10")
         login_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
 
         # 创建账号标签和输入框
-        username_label = ttk.Label(login_frame, text="卡密:")
+        # 创建自定义样式
+        style = ttk.Style()
+        style.configure("BlueUnderline.TLabel", foreground="blue", font=("TkDefaultFont", 10, "underline"))
+        username_label = ttk.Label(login_frame, text="卡密:", style="BlueUnderline.TLabel")
+
         username_label.grid(row=0, column=0, padx=5, pady=5)
+        username_label.bind("<Button-1>", open_baidu)
+
         self.username_entry = ttk.Entry(login_frame)
         self.username_entry.grid(row=0, column=1, padx=5, pady=5)
 
@@ -97,11 +109,11 @@ class login(MySQLDatabase):
     # 加载之前保存的账号密码
     def load_credentials(self):
         if os.path.exists(self.CREDENTIALS_FILE):
+
             with open(self.CREDENTIALS_FILE, "r") as file:
                 try:
-                    username, password = file.read().splitlines()
+                    username = file.read().splitlines()
                     self.username_entry.insert(0, username)
-                    # self.password_entry.insert(0, password)
                 except (ValueError, IndexError):
                     pass
 

@@ -1,47 +1,23 @@
-import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QLineEdit, QPushButton, QLabel
+import requests
+headers = {
+            "accept": "application/json, text/plain, */*",
+            "accept-encoding": "gzip, deflate, br, zstd",
+            "accept-language": "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6",
+            "authorization": "Bearer 111111",
+            "connection": "keep-alive",
+            "content-length": "2",
+            "content-type": "application/json",
+            "host": "127.0.0.1:3000",
+            "origin": "http://127.0.0.1:6099",
+            "referer": "http://127.0.0.1:6099/",
+            "sec-ch-ua": "'Microsoft Edge';v='135', 'Not-A.Brand';v='8', 'Chromium';v='135'",
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": "'Windows'",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "same-site",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0"
+        }
 
-
-class MyWindow(QWidget):
-    def __init__(self):
-        super().__init__()
-        # 使窗口始终置顶
-        # 设置窗口标题
-        self.setWindowTitle("PyQt5 输入框示例")
-
-        # 布局管理器
-        layout = QVBoxLayout()
-
-        # 创建一个输入框
-        self.lineEdit = QLineEdit(self)
-        layout.addWidget(self.lineEdit)
-
-        # 创建一个按钮
-        self.button = QPushButton("获取文本", self)
-        layout.addWidget(self.button)
-
-        # 当按钮被点击时触发的动作
-        self.button.clicked.connect(self.on_click)
-
-        # 显示标签用于输出结果
-        self.label = QLabel("", self)
-        layout.addWidget(self.label)
-
-        # 设置布局
-        self.setLayout(layout)
-
-    def on_click(self):
-        # 获取输入框中的文本
-        text = self.lineEdit.text()
-        # 更新标签内容
-        self.label.setText(f"您输入的是: {text}")
-
-
-# 主函数
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-
-    window = MyWindow()
-    window.show()
-
-    sys.exit(app.exec_())
+url = 'http://192.168.188.128:3000/get_friends_with_category'
+res = requests.post(url=url,)

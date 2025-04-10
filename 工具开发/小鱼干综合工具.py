@@ -107,18 +107,31 @@ class MultiPageWindow(QWidget):
     def create_buttons(self):
         self.button_page1 = QPushButton("搬砖", self)
         self.button_page1.clicked.connect(lambda: self.switch_page(0))
+        self.button_page1.setStyleSheet("QPushButton{background-color:rgb(206, 202, "
+                                        "255);border:none;height:44px;width: 180px;border-radius:9px;}QPushButton::hover{"
+                                        "background-color:rgb(155, 146, "
+                                        "255);border:none;height:24px;border-radius:9px;}")
+
         self.button_layout.addWidget(self.button_page1)
 
         self.button_page2 = QPushButton("扫拍", self)
         self.button_page2.clicked.connect(lambda: self.switch_page(1))
+        self.button_page2.setStyleSheet("QPushButton{background-color:rgb(206, 202, "
+                                        "255);border:none;height:44px;width: 180px;border-radius:9px;}QPushButton::hover{"
+                                        "background-color:rgb(155, 146, "
+                                        "255);border:none;height:24px;border-radius:9px;}")
+
         self.button_layout.addWidget(self.button_page2)
 
         self.button_page3 = QPushButton("其他", self)
+        self.button_page3.setStyleSheet("QPushButton{background-color:rgb(206, 202, 255);border:none;height:44px; "
+                                        "width: 180px;border-radius:9px;}QPushButton::hover{background-color:rgb(155, "
+                                        "146, 255);border:none;height:54px;border-radius:9px;}")
         self.button_page3.clicked.connect(lambda: self.switch_page(2))
         self.button_layout.addWidget(self.button_page3)
-
+        self.button_layout.addStretch()
         # 默认显示第一页
-        self.page_layout.setCurrentIndex(0)
+        self.page_layout.setCurrentIndex(1)
 
     def switch_page(self, index):
         """根据索引切换页面"""
@@ -191,71 +204,82 @@ class MultiPageWindow(QWidget):
         """第二页内容"""
         page1_layout_total = QHBoxLayout(self.page2)
         # 第一列布局，包含下拉框和开始按钮
-        page1_layout1 = QVBoxLayout(self.page2)  # 第一列
-        page1_layout4 = QHBoxLayout(self.page2)  # 第一行
-        page1_layout5 = QHBoxLayout(self.page2)  # 第二行
-        page1_layout6 = QHBoxLayout(self.page2)  # 第三行
-        page1_layout7 = QHBoxLayout(self.page2)  # 第四行
-        page1_layout8 = QHBoxLayout(self.page2)  # 第四行
+        page1_layout0 = QVBoxLayout(self.page2)  # 第一列  # 创建一个空间，所有元素都加入这个空间中
+        page1_layout1 = QHBoxLayout(self.page2)  # 第一行  # 物品名称
+        page1_layout2 = QHBoxLayout(self.page2)  # 第二行  # 目标价格
+        page1_layout3 = QHBoxLayout(self.page2)  # 第三行  # 随机间隔
+        page1_layout4 = QHBoxLayout(self.page2)  # 第四行  # 扫拍停止
+        page1_layout5 = QHBoxLayout(self.page2)  # 第五行  # 是否有单价，是否需要初始化
+        page1_layout6 = QHBoxLayout(self.page2)  # 第六行  # 开始
 
         # 第一行
         wupinming = QLabel("物品名称:", self.page2)
-        page1_layout4.addWidget(wupinming)
-        name = QLineEdit(self.page2)
-        page1_layout4.addWidget(name)
+        page1_layout1.addWidget(wupinming)
+        self.name = QLineEdit(self.page2)
+        page1_layout1.addWidget(self.name)
         wupinming.setFixedSize(110, 35)
-
         # 第二行
         mubiaojiage = QLabel("目标价格:", self.page2)
-        page1_layout5.addWidget(mubiaojiage)
+        page1_layout2.addWidget(mubiaojiage)
         jiage = QLineEdit(self.page2)
-        page1_layout5.addWidget(jiage)
+        page1_layout2.addWidget(jiage)
         mubiaojiage.setFixedSize(110, 35)
 
-        # 第三行
-        tingzhi = QLabel("扫怕停止:", self.page2)
-        page1_layout6.addWidget(tingzhi)
-        jiner = QLineEdit(self.page2)
-        jiner.setPlaceholderText("默认不自动停止")
+        # 间隔时间
+        mubiaojiage = QLabel("间隔时间:", self.page2)
+        page1_layout3.addWidget(mubiaojiage)
+        start_time = QLineEdit(self.page2)
+        page1_layout3.addWidget(start_time)
+        lianjie = QLabel("-", self.page2)
+        page1_layout3.addWidget(lianjie)
+        end_time = QLineEdit(self.page2)
+        page1_layout3.addWidget(end_time)
 
-        page1_layout6.addWidget(jiner)
-        mubiaojiage.setFixedSize(110, 35)
+        # # 第三行
+        # tingzhi = QLabel("扫怕停止:", self.page2)
+        # page1_layout4.addWidget(tingzhi)
+        # jiner = QLineEdit(self.page2)
+        # jiner.setPlaceholderText("默认不自动停止")
+        # page1_layout4.addWidget(jiner)
+        # mubiaojiage.setFixedSize(110, 35)
 
         # 第四行 创建一个点选按钮
         checkbox1 = QCheckBox("是否有单价", self)
         checkbox1.setChecked(True)
-        page1_layout7.addWidget(checkbox1)
+        page1_layout5.addWidget(checkbox1)
 
         checkbox2 = QCheckBox("是否要初始化", self)
         checkbox2.setChecked(True)
-        page1_layout7.addWidget(checkbox2)
+        page1_layout5.addWidget(checkbox2)
 
         #
-        start = QPushButton('扫拍-开始/Home')
-        start.clicked.connect(self.run_banzhuan)
-        start.setFixedSize(180, 66)
-        stop = QPushButton('搓药')
-        stop.clicked.connect(self.force_stop_qthread)
-        stop.setFixedSize(180, 66)
+        self.start = QPushButton('扫拍-开始/Home')
+        # self.start.clicked.connect(self.run_banzhuan)
+        self.start.setFixedSize(180, 66)
+        self.stop = QPushButton('搓药')
+        # self.stop.clicked.connect(self.force_stop_qthread)
+        self.stop.setFixedSize(180, 66)
 
-        page1_layout8.addWidget(start)
-        page1_layout8.addWidget(stop)
+        page1_layout6.addWidget(self.start)
+        page1_layout6.addWidget(self.stop)
 
         # 为了美观和布局管理，可以添加伸展项使组件居中
-        page1_layout1.addStretch()
-        page1_layout1.addLayout(page1_layout4)
-        page1_layout1.addStretch()
-        page1_layout1.addLayout(page1_layout5)
-        page1_layout1.addStretch()
-        page1_layout1.addLayout(page1_layout6)
-        page1_layout1.addStretch()
-        page1_layout1.addLayout(page1_layout7)
-        page1_layout1.addStretch()
-        page1_layout1.addLayout(page1_layout8)
-        page1_layout1.addStretch()
-        page1_layout_total.addLayout(page1_layout1)
+        page1_layout0.addStretch()
+        page1_layout0.addLayout(page1_layout1)
+        page1_layout0.addStretch()
+        page1_layout0.addLayout(page1_layout2)
+        page1_layout0.addStretch()
+        page1_layout0.addLayout(page1_layout3)
+        page1_layout0.addStretch()
+        page1_layout0.addLayout(page1_layout4)
+        page1_layout0.addStretch()
+        page1_layout0.addLayout(page1_layout5)
+        page1_layout0.addStretch()
+        page1_layout0.addLayout(page1_layout6)
+        page1_layout0.addStretch()
+        page1_layout_total.addLayout(page1_layout0)
         for i in range(18):
-            page1_layout1.addStretch()
+            page1_layout0.addStretch()
 
         # 第二列布局，仅包含文本编辑框
         page1_layout2 = QVBoxLayout(self.page2)
@@ -372,6 +396,8 @@ class MultiPageWindow(QWidget):
 
     def run_banzhuan(self):
         """搬砖代码"""
+        name = self.name.text()
+        print(name)
         # self.worker = Worker()
         # self.set_banzhuan_log('你干嘛~ ，哎呦~')
         self.worker.start()  # 在单独的线程中开始执行耗时任务

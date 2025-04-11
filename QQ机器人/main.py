@@ -7,24 +7,18 @@ import time
 
 class NapCatQQ:
     def __init__(self):
-        self.url = 'http://192.168.188.128:3000/'
+        self.url = 'http://192.168.188.128:3000'
         self.headers = {
             "accept": "application/json, text/plain, */*",
-            "accept-encoding": "gzip, deflate, br, zstd",
+            "accept-encoding": "gzip, deflate",
             "accept-language": "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6",
-            "authorization": "Bearer 111111",
+            "authorization": "Bearer 1111",
             "connection": "keep-alive",
-            "content-length": "2",
+            "content-length": "18",
             "content-type": "application/json",
-            "host": "127.0.0.1:3000",
-            "origin": "http://127.0.0.1:6099",
-            "referer": "http://127.0.0.1:6099/",
-            "sec-ch-ua": "'Microsoft Edge';v='135', 'Not-A.Brand';v='8', 'Chromium';v='135'",
-            "sec-ch-ua-mobile": "?0",
-            "sec-ch-ua-platform": "'Windows'",
-            "sec-fetch-dest": "empty",
-            "sec-fetch-mode": "cors",
-            "sec-fetch-site": "same-site",
+            "host": "192.168.188.128:3000",
+            "origin": "http://192.168.188.128:6099",
+            "referer": "http://192.168.188.128:6099/",
             "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0"
         }
 
@@ -32,9 +26,7 @@ class NapCatQQ:
         """获取好友列表 QQ和昵称"""
         data_list = {}
         url = self.url + '/get_friend_list'
-        data = {
-            "no_cache": 'false'
-        }
+        data = {"no_cache": 'false'}
         res = requests.post(url, headers=self.headers, json=data)
         all_data = res.json()
         if all_data['status'] == 'ok':
@@ -137,6 +129,7 @@ class NapCatQQ:
 
 
 if __name__ == '__main__':
+    "linux 启动命令 xvfb-run -a qq --no-sandbox"
     napcatqq = NapCatQQ()
     # all_qq = napcatqq.get_friend_list()  # 查看全部qq好友
     # print(all_qq)
@@ -146,5 +139,5 @@ if __name__ == '__main__':
 
     group_list = napcatqq.get_group_list()  # 获取所有群列表
     print(group_list)
-    data_list = napcatqq.get_group_msg_history(qqgroup='778631068')  # 获取指定群消息群消息
-    print(data_list)
+    # data_list = napcatqq.get_group_msg_history(qqgroup='778631068')  # 获取指定群消息群消息
+    # print(data_list)

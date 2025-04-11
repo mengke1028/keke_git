@@ -3,7 +3,7 @@ import time
 import threading
 from PyQt5.QtCore import QThread, pyqtSignal, QObject, pyqtSlot
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QLabel, QHBoxLayout, QStackedLayout, \
-    QTextEdit, QLineEdit, QCheckBox
+    QTextEdit, QLineEdit, QCheckBox, QFrame, QFileDialog
 from PyQt5.QtWidgets import QComboBox
 from pynput import keyboard
 
@@ -53,19 +53,24 @@ class MultiPageWindow(QWidget):
 
         # 左侧按钮栏布局
         self.button_layout = QVBoxLayout()
-
+        self.log_layout = QVBoxLayout()
         # 右侧页面栏布局，使用堆栈布局方便切换页面
         self.page_layout = QStackedLayout()
 
-        # 创建页面
+        # 创建切换页面
         self.create_pages()
 
-        # 创建按钮并添加到左侧按钮栏布局
+        # 创建按钮页面
         self.create_buttons()
+
+        # 创建log页面
+        self.create_log()
 
         # 将按钮栏布局和页面布局添加到主布局
         self.main_layout.addLayout(self.button_layout)
         self.main_layout.addLayout(self.page_layout)
+        self.main_layout.addLayout(self.log_layout)
+
         # # 启动全局按键监听
         # self.start_global_key_listener()
     def create_pages(self):
@@ -131,64 +136,10 @@ class MultiPageWindow(QWidget):
         self.button_layout.addWidget(self.button_page3)
         self.button_layout.addStretch()
         # 默认显示第一页
-        self.page_layout.setCurrentIndex(1)
+        self.page_layout.setCurrentIndex(0)
 
-    def switch_page(self, index):
-        """根据索引切换页面"""
-        self.page_layout.setCurrentIndex(index)
-
-    def indesx_1(self):
-        """第一页内容"""
-        page1_layout_total = QHBoxLayout(self.page1)
-        # 第一列布局，包含下拉框和开始按钮
-        page1_layout1 = QVBoxLayout(self.page1)
-        page1_layout4 = QHBoxLayout(self.page1)
-        page1_layout5 = QHBoxLayout(self.page1)
-        page1_layout6 = QHBoxLayout(self.page1)
-        page1_layout1.addStretch()
-        page1_layout4.addStretch()
-        combo = QComboBox(self.page1)
-        combo.addItem("风暴逆鳞")
-        combo.addItem("圣殿")
-        combo.addItem("海伯伦")
-        page1_layout4.addWidget(combo)
-        page1_layout4.addStretch()
-
-        page1_layout4.addStretch()
-        combo2 = QComboBox(self.page1)
-        combo2.setFixedSize(180, 35)
-
-        combo.setFixedSize(180, 35)
-        combo2.addItem("普通")
-        combo2.addItem("冒险")
-        combo2.addItem("勇士")
-        combo2.addItem("王者")
-        combo2.addItem("噩梦")
-        page1_layout4.addWidget(combo2)
-        page1_layout4.addStretch()
-
-        page1_layout5.addStretch()
-        start = QPushButton('开始')
-        start.clicked.connect(self.run_banzhuan)
-        start.setFixedSize(180, 35)
-        stop = QPushButton('停止')
-        stop.clicked.connect(self.force_stop_qthread)
-        stop.setFixedSize(180, 35)
-
-        page1_layout5.addWidget(start)
-        page1_layout5.addWidget(stop)
-        page1_layout5.addStretch()
-
-        # 为了美观和布局管理，可以添加伸展项使组件居中
-        page1_layout1.addLayout(page1_layout4)
-        page1_layout1.addStretch()
-        page1_layout1.addLayout(page1_layout6)
-        page1_layout1.addStretch()
-        page1_layout1.addLayout(page1_layout5)
-        page1_layout_total.addLayout(page1_layout1)
-        for i in range(20):
-            page1_layout1.addStretch()
-
+    def create_log(self):
+        """创建log页面"""
         # 第二列布局，仅包含文本编辑框
         page1_layout2 = QVBoxLayout(self.page1)
         self.edig = edig = QTextEdit(self.page1)
@@ -196,9 +147,76 @@ class MultiPageWindow(QWidget):
         self.set_banzhuan_log('初始化完成')
         edig.setFixedSize(500, 888)  # 设置文本编辑框的固定大小
         page1_layout2.addWidget(edig)
-        page1_layout_total.addLayout(page1_layout2)
+        self.log_layout.addLayout(page1_layout2)
 
-        # self.page_layout.addWidget(self.page1)
+
+
+    def switch_page(self, index):
+        """根据索引切换页面"""
+        self.page_layout.setCurrentIndex(index)
+
+
+    def indesx_1(self):
+        """第一页内容"""
+        page1_layout_total = QHBoxLayout(self.page1)
+        # 第一列布局，包含下拉框和开始按钮
+        page1_layout0 = QVBoxLayout(self.page1)  # 创建一个盒子
+        page1_layout1 = QHBoxLayout(self.page1)  # 第一行
+        page1_layout2 = QHBoxLayout(self.page1)  # 第二行
+        page1_layout6 = QHBoxLayout(self.page1)  # 第三行
+        self.ditu = QComboBox(self.page1)
+        self.ditu.addItem("风暴逆鳞")
+        page1_layout1.addWidget(self.ditu)
+        self.nandu = QComboBox(self.page1)
+        self.nandu.setFixedSize(200, 50)
+
+        self.ditu.setFixedSize(200, 50)
+        self.nandu.addItem("普通")
+        self.nandu.addItem("冒险")
+        self.nandu.addItem("勇士")
+        self.nandu.addItem("王者")
+        self.nandu.addItem("噩梦")
+        page1_layout1.addWidget(self.nandu)
+        self.banzhuan_start = QPushButton('开始')
+        self.banzhuan_start.setStyleSheet("""
+QPushButton {
+    background-color: rgb(34, 40, 49);
+    border: 2px solid rgb(0, 173, 181);
+    height: 44px;
+    width: 180px;
+    border-radius: 30px;
+    color: rgb(0, 173, 181);
+    font-size: 30px;
+    font-weight: bold;
+}
+QPushButton::hover {
+    background-color: rgb(57, 62, 70);
+    border: 2px solid rgb(0, 200, 208);
+    height: 44px;
+    border-radius: 10px;
+    color: rgb(0, 200, 208);
+}
+QPushButton::pressed {
+    background-color: rgb(23, 27, 33);
+    border: 2px solid rgb(0, 120, 126);
+    height: 44px;
+    border-radius: 10px;
+    color: rgb(0, 120, 126);
+}
+""")
+        self.banzhuan_start.setFixedSize(200, 100)
+        self.banzhuan_stop = QPushButton('停止/home')
+        self.banzhuan_stop.setFixedSize(200, 100)
+
+        page1_layout2.addWidget(self.banzhuan_start)
+        page1_layout2.addWidget(self.banzhuan_stop)
+
+        # 为了美观和布局管理，可以添加伸展项使组件居中
+        page1_layout0.addLayout(page1_layout1)
+        page1_layout0.addLayout(page1_layout6)
+        page1_layout0.addLayout(page1_layout2)
+        page1_layout_total.addLayout(page1_layout0)
+        page1_layout0.addStretch()
 
     def indesx_2(self):
         """第二页内容"""
@@ -221,19 +239,19 @@ class MultiPageWindow(QWidget):
         # 第二行
         mubiaojiage = QLabel("目标价格:", self.page2)
         page1_layout2.addWidget(mubiaojiage)
-        jiage = QLineEdit(self.page2)
-        page1_layout2.addWidget(jiage)
+        self.jiage = QLineEdit(self.page2)
+        page1_layout2.addWidget(self.jiage)
         mubiaojiage.setFixedSize(110, 35)
 
-        # 间隔时间
+        # 第三行
         mubiaojiage = QLabel("间隔时间:", self.page2)
         page1_layout3.addWidget(mubiaojiage)
-        start_time = QLineEdit(self.page2)
-        page1_layout3.addWidget(start_time)
+        self.start_time = QLineEdit(self.page2)
+        page1_layout3.addWidget(self.start_time)
         lianjie = QLabel("-", self.page2)
         page1_layout3.addWidget(lianjie)
-        end_time = QLineEdit(self.page2)
-        page1_layout3.addWidget(end_time)
+        self.end_time = QLineEdit(self.page2)
+        page1_layout3.addWidget(self.end_time)
 
         # # 第三行
         # tingzhi = QLabel("扫怕停止:", self.page2)
@@ -244,147 +262,103 @@ class MultiPageWindow(QWidget):
         # mubiaojiage.setFixedSize(110, 35)
 
         # 第四行 创建一个点选按钮
-        checkbox1 = QCheckBox("是否有单价", self)
-        checkbox1.setChecked(True)
-        page1_layout5.addWidget(checkbox1)
+        self.checkbox1 = QCheckBox("是否有单价", self)
+        page1_layout5.addWidget(self.checkbox1)
+        self.checkbox2 = QCheckBox("是否要初始化", self)
+        page1_layout5.addWidget(self.checkbox2)
 
-        checkbox2 = QCheckBox("是否要初始化", self)
-        checkbox2.setChecked(True)
-        page1_layout5.addWidget(checkbox2)
-
-        #
+        # 第五行 创建一个点选按钮
         self.start = QPushButton('扫拍-开始/Home')
-        # self.start.clicked.connect(self.run_banzhuan)
-        self.start.setFixedSize(180, 66)
+        self.start.setFixedSize(200, 66)
         self.stop = QPushButton('搓药')
-        # self.stop.clicked.connect(self.force_stop_qthread)
-        self.stop.setFixedSize(180, 66)
+        self.stop.setFixedSize(200, 66)
 
         page1_layout6.addWidget(self.start)
         page1_layout6.addWidget(self.stop)
 
         # 为了美观和布局管理，可以添加伸展项使组件居中
-        page1_layout0.addStretch()
         page1_layout0.addLayout(page1_layout1)
-        page1_layout0.addStretch()
         page1_layout0.addLayout(page1_layout2)
-        page1_layout0.addStretch()
         page1_layout0.addLayout(page1_layout3)
-        page1_layout0.addStretch()
         page1_layout0.addLayout(page1_layout4)
-        page1_layout0.addStretch()
         page1_layout0.addLayout(page1_layout5)
-        page1_layout0.addStretch()
         page1_layout0.addLayout(page1_layout6)
-        page1_layout0.addStretch()
         page1_layout_total.addLayout(page1_layout0)
-        for i in range(18):
-            page1_layout0.addStretch()
-
-        # 第二列布局，仅包含文本编辑框
-        page1_layout2 = QVBoxLayout(self.page2)
-        self.edig = edig = QTextEdit(self.page2)
-        edig.setReadOnly(True)
-        # self.set_banzhuan_log('初始化完成')
-        edig.setFixedSize(500, 888)  # 设置文本编辑框的固定大小
-        page1_layout2.addWidget(edig)
-        page1_layout_total.addLayout(page1_layout2)
+        page1_layout0.addStretch()
 
     def indesx_3(self):
         """第二页内容"""
         page1_layout_total = QHBoxLayout(self.page3)
         # 第一列布局，包含下拉框和开始按钮
-        page1_layout1 = QVBoxLayout(self.page3)  # 第一列
-        page1_layout4 = QHBoxLayout(self.page3)  # 第一行
-        page1_layout5 = QHBoxLayout(self.page3)  # 第二行
-        # page1_layout6 = QHBoxLayout(self.page3)  # 第三行
-        # page1_layout7 = QHBoxLayout(self.page3)  # 第四行
-        # page1_layout8 = QHBoxLayout(self.page3)  # 第四行
+        page1_layout0 = QVBoxLayout(self.page3)  #
+        page1_layout1 = QHBoxLayout(self.page3)  # 第一行
+        page1_layout2 = QHBoxLayout(self.page3)  # 第二行
+        page1_layout3 = QHBoxLayout(self.page3)  # 第三行
+        page1_layout4 = QHBoxLayout(self.page3)  # 第四行
 
         # 第一行
-        wupinming = QLabel("CF速点宏:", self.page3)
-        page1_layout4.addWidget(wupinming)
-        start = QPushButton("开始/home", self.page3)
-        page1_layout4.addWidget(start)
-        wupinming.setFixedSize(150, 35)
+        wupinming = QLabel("兑换工会卡:", self.page3)
+        page1_layout1.addWidget(wupinming)
+        self.gonghuika = QPushButton("开始", self.page3)
+        page1_layout1.addWidget(self.gonghuika)
+        # wupinming.setFixedSize(200, 35)
 
-        # 当按钮被点击时触发的动作
-        start.clicked.connect(self.right_click)
-        page1_layout4.addStretch()
+        separator = QFrame()
+        separator.setFrameShape(QFrame.HLine)  # 水平分割线
+        separator.setLineWidth(2)
 
+        separator2 = QFrame()
+        separator2.setFrameShape(QFrame.HLine)  # 水平分割线
+        separator2.setLineWidth(2)
+        separator3 = QFrame()
+        separator3.setFrameShape(QFrame.HLine)  # 水平分割线
+        separator3.setLineWidth(2)
+
+
+
+        # separator.setFrameShadow(QFrame.Sunken)
         # 第二行
-        youjian = QLabel("CF连续右键:", self.page3)
-        page1_layout5.addWidget(youjian)
-        start_youjiao = QPushButton("开始/end", self.page3)
-        page1_layout5.addWidget(start_youjiao)
-        youjian.setFixedSize(150, 35)
-        # 当按钮被点击时触发的动作
-        start_youjiao.clicked.connect(self.left_click)
-        page1_layout5.addStretch()
-
+        youjian = QLabel("兑换黄龙白玉宝珠:", self.page3)
+        page1_layout2.addWidget(youjian)
+        self.duihuanbaiyu = QPushButton("开始", self.page3)
+        page1_layout2.addWidget(self.duihuanbaiyu)
+        # youjian.setFixedSize(200, 35)
 
         # 第三行
-        # tingzhi = QLabel("扫怕停止:", self.page3)
-        # page1_layout6.addWidget(tingzhi)
-        # jiner = QLineEdit(self.page3)
-        # jiner.setPlaceholderText("默认不自动停止")
-        #
-        # page1_layout6.addWidget(jiner)
-        # mubiaojiage.setFixedSize(110, 35)
-        #
-        # # 第四行 创建一个点选按钮
-        # checkbox1 = QCheckBox("是否有单价", self)
-        # checkbox1.setChecked(True)
-        # page1_layout7.addWidget(checkbox1)
-        #
-        # checkbox2 = QCheckBox("是否要初始化", self)
-        # checkbox2.setChecked(True)
-        # page1_layout7.addWidget(checkbox2)
-        #
-        # #
-        # start = QPushButton('扫拍-开始/Home')
-        # start.clicked.connect(self.run_banzhuan)
-        # start.setFixedSize(180, 66)
-        # stop = QPushButton('搓药')
-        # stop.clicked.connect(self.force_stop_qthread)
-        # stop.setFixedSize(180, 66)
-        #
-        # page1_layout8.addWidget(start)
-        # page1_layout8.addWidget(stop)
+        shangpjiage = QLabel("商品价格记录:", self.page3)
+        # shangpjiage.setFixedSize(200, 35)
+        page1_layout3.addWidget(shangpjiage)
+        self.jilushangpin = QPushButton("开始", self.page3)
+        page1_layout3.addWidget(self.jilushangpin)
+        # youjian.setFixedSize(200, 35)
 
-        # 为了美观和布局管理，可以添加伸展项使组件居中
-        page1_layout1.addStretch()
-        page1_layout1.addLayout(page1_layout4)
-        page1_layout1.addStretch()
-        page1_layout1.addLayout(page1_layout5)
-        page1_layout1.addStretch()
-        # page1_layout1.addLayout(page1_layout6)
-        # page1_layout1.addStretch()
-        # page1_layout1.addLayout(page1_layout7)
-        # page1_layout1.addStretch()
-        # page1_layout1.addLayout(page1_layout8)
-        # page1_layout1.addStretch()
-        page1_layout_total.addLayout(page1_layout1)
-        for i in range(18):
-            page1_layout1.addStretch()
+        select_file_button = QPushButton("选择文件", self)
+        # select_file_button.setFixedSize(100, 35)
+        select_file_button.clicked.connect(self.select_file)
+        page1_layout4.addWidget(select_file_button)
+        self.file_path_input = QLineEdit(self)
+        # select_file_button.setFixedSize(100, 35)
+        self.file_path_input.setReadOnly(True)
+        page1_layout4.addWidget(self.file_path_input)
 
-        # # 第二列布局，仅包含文本编辑框
-        # page1_layout2 = QVBoxLayout(self.page3)
-        # self.edig = edig = QTextEdit(self.page3)
-        # edig.setReadOnly(True)
-        # # self.set_banzhuan_log('初始化完成')
-        # edig.setFixedSize(500, 888)  # 设置文本编辑框的固定大小
-        # page1_layout2.addWidget(edig)
-        # page1_layout_total.addLayout(page1_layout2)
+        page1_layout0.addLayout(page1_layout1)
+        page1_layout0.addWidget(separator)
+        page1_layout0.addLayout(page1_layout2)
+        page1_layout0.addWidget(separator2)
+        page1_layout0.addLayout(page1_layout3)
+        page1_layout0.addLayout(page1_layout4)
+        page1_layout0.addWidget(separator3)
 
-    def right_click(self):
-        """速点"""
-        pass
 
-    def left_click(self):
-        """右键速点"""
-        pass
+        page1_layout_total.addLayout(page1_layout0)
+        page1_layout0.addStretch()
+        page1_layout_total.addStretch()
 
+    def select_file(self):
+        file_dialog = QFileDialog()
+        file_path, _ = file_dialog.getOpenFileName(self, "选择文件", "", "所有文件 (*.*)")
+        if file_path:
+            self.file_path_input.setText(file_path)
 
     def set_banzhuan_log(self, data):
         "板砖页面的log输出在 log框里"

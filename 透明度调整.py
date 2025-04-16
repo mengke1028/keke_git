@@ -65,15 +65,15 @@ def get_edge_window_handle(leiming):
 
 if __name__ == '__main__':
     # # 调用函数获取 Edge 窗口句柄
-    leiming = '主力机'
+    leiming = '196 836 990 2'
     edge_handles = get_edge_window_handle(leiming)
     if edge_handles:
         print(f"找到 {leiming}窗口句柄:")
         for handle in edge_handles:
             print(handle)
-            # set_window_transparency(handle, 50)
+            # set_window_transparency(handle, 5)
     else:
         print("未找到 Microsoft Edge 窗口。")
 
     # window_title = callback()
-    set_window_transparency(3015824, 6)
+    # set_window_transparency(595236, 60)

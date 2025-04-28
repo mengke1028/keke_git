@@ -13,6 +13,7 @@ import json
 class MW(MultiPageWindow):
     def __init__(self):
         super().__init__()
+        self.config_data = {}
         # 自动上号
         self.shanghao.clicked.connect(self.wegam_loging)  # 开始上号
         self.mimaben_path = None
@@ -77,7 +78,7 @@ class MW(MultiPageWindow):
         self.dengji = self.nandu.currentText()
         for i in range(30):
             self.set_banzhuan_log(self.tu, self.dengji, 123)  # 写入log
-        print(self.tu, self.dengji)
+        # print(self.tu, self.dengji)
         self.save_config()
 
     def get_saopai(self):

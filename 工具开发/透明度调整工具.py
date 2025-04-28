@@ -94,8 +94,9 @@ if window_info:
     handle_entry.insert(0, str(window_info[0][0]))
 
 # 创建透明度滑动条
+# 创建透明度滑动条，增加 length 参数设置长度
 transparency_scale = tk.Scale(root, from_=0, to=100, orient=tk.HORIZONTAL,
-                              label="透明度 (0 - 100)", command=set_window_transparency)
+                              label="透明度 (0 - 100)", command=set_window_transparency, length=300)
 transparency_scale.set(100)  # 默认设置为不透明
 transparency_scale.pack(pady=10)
 handle_label = tk.Label(root, text="开发者Q 193904974")

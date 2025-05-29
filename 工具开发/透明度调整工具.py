@@ -99,6 +99,4 @@ transparency_scale = tk.Scale(root, from_=0, to=100, orient=tk.HORIZONTAL,
                               label="透明度 (0 - 100)", command=set_window_transparency, length=300)
 transparency_scale.set(100)  # 默认设置为不透明
 transparency_scale.pack(pady=10)
-handle_label = tk.Label(root, text="开发者Q 193904974")
-handle_label.pack()
 root.mainloop()

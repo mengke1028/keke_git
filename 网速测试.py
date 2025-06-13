@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk, Canvas
+from tkinter import ttk
 import psutil
 import time
 from threading import Thread
@@ -9,105 +9,139 @@ class NetworkMonitor:
     def __init__(self, root):
         self.root = root
         self.root.title("网速监控工具")
-        self.root.geometry("600x400")
+        self.root.geometry("400x300")
         self.root.resizable(False, False)
 
-        # 初始化网络计数器
-        self.old_download = psutil.net_io_counters().bytes_recv
-        self.old_upload = psutil.net_io_counters().bytes_sent
+        # 存储网卡信息
+        self.interfaces = self.get_network_interfaces()
+        self.selected_interface = tk.StringVar(value=list(self.interfaces.keys())[0])
 
-        # 创建界面组件
+        # 网络计数器
+        self.old_download = 0
+        self.old_upload = 0
+
+        # 创建界面
         self.create_widgets()
-        # 启动实时更新线程
-        self.update_thread = Thread(target=self.update_metrics, daemon=True)
-        self.update_thread.start()
+
+        # 启动监控线程
+        self.is_running = True
+        self.monitor_thread = Thread(target=self.monitor_network, daemon=True)
+        self.monitor_thread.start()
+
+        # 窗口关闭时停止监控
+        self.root.protocol("WM_DELETE_WINDOW", self.on_close)
+
+    def get_network_interfaces(self):
+        """获取所有可用的网络接口"""
+        interfaces = psutil.net_if_addrs()
+        return {name: info for name, info in interfaces.items() if info}
 
     def create_widgets(self):
-        # 顶部标题
-        tk.Label(self.root, text="实时网速监控", font=("微软雅黑", 16, "bold")).pack(pady=10)
+        # 标题
+        title_label = tk.Label(
+            self.root,
+            text="网速监控工具",
+            font=("微软雅黑", 16, "bold"),
+            pady=10
+        )
+        title_label.pack()
 
-        # 速度显示框架
-        speed_frame = ttk.Frame(self.root)
-        speed_frame.pack(pady=20, padx=20, fill="x")
+        # 网卡选择下拉框
+        interface_frame = ttk.Frame(self.root)
+        interface_frame.pack(fill="x", padx=20, pady=10)
 
-        # 下载速度
-        self.download_label = ttk.Label(speed_frame, text="下载速度：0.00 KB/s", font=("微软雅黑", 12))
-        self.download_label.pack(side="left", padx=10)
+        ttk.Label(interface_frame, text="选择网卡:").pack(side="left", padx=5)
 
-        # 上传速度
-        self.upload_label = ttk.Label(speed_frame, text="上传速度：0.00 KB/s", font=("微软雅黑", 12))
-        self.upload_label.pack(side="left", padx=10)
+        interface_combo = ttk.Combobox(
+            interface_frame,
+            textvariable=self.selected_interface,
+            values=list(self.interfaces.keys()),
+            state="readonly",
+            width=20
+        )
+        interface_combo.pack(side="left", padx=5)
+        interface_combo.bind("<<ComboboxSelected>>", self.reset_counters)
 
-        # 图表区域
-        self.canvas = Canvas(self.root, width=550, height=150, bg="white")
-        self.canvas.pack(pady=10, padx=20)
-        self.canvas.create_text(275, 130, text="近10秒网速趋势", font=("微软雅黑", 10))
+        # 网速显示区域
+        speed_frame = ttk.LabelFrame(self.root, text="实时网速")
+        speed_frame.pack(fill="both", expand=True, padx=20, pady=10)
 
-        # 初始化图表数据
-        self.download_history = [0] * 10
-        self.upload_history = [0] * 10
-        self.plot_graph()
+        self.download_label = tk.Label(
+            speed_frame,
+            text="下载: 0.00 KB/s",
+            font=("微软雅黑", 14),
+            pady=10
+        )
+        self.download_label.pack()
 
-    def get_current_speed(self):
-        # 获取当前网络流量
-        now = psutil.net_io_counters()
-        download = now.bytes_recv
-        upload = now.bytes_sent
+        self.upload_label = tk.Label(
+            speed_frame,
+            text="上传: 0.00 KB/s",
+            font=("微软雅黑", 14)
+        )
+        self.upload_label.pack()
 
-        # 计算速度（KB/s）
-        dl_speed = (download - self.old_download) / 1024
-        ul_speed = (upload - self.old_upload) / 1024
+        # 状态栏
+        self.status_var = tk.StringVar(value="监控中: " + self.selected_interface.get())
+        status_bar = ttk.Label(
+            self.root,
+            textvariable=self.status_var,
+            relief="sunken",
+            anchor="w"
+        )
+        status_bar.pack(side="bottom", fill="x")
 
-        # 更新计数器
-        self.old_download = download
-        self.old_upload = upload
+    def reset_counters(self, event=None):
+        """切换网卡时重置计数器"""
+        self.old_download = self.get_current_bytes()[0]
+        self.old_upload = self.get_current_bytes()[1]
+        self.status_var.set("监控中: " + self.selected_interface.get())
 
-        return dl_speed, ul_speed
+    def get_current_bytes(self):
+        """获取当前网卡的接收和发送字节数"""
+        try:
+            interface = self.selected_interface.get()
+            counters = psutil.net_io_counters(pernic=True)[interface]
+            return counters.bytes_recv, counters.bytes_sent
+        except (KeyError, AttributeError):
+            # 处理网卡不存在的情况
+            return 0, 0
 
-    def update_metrics(self):
-        while True:
-            dl, ul = self.get_current_speed()
-            # 更新标签显示（保留两位小数）
-            self.download_label.config(text=f"下载速度：{dl:.2f} KB/s")
-            self.upload_label.config(text=f"上传速度：{ul:.2f} KB/s")
+    def monitor_network(self):
+        """监控网络速度的线程函数"""
+        self.reset_counters()
 
-            # 更新历史数据
-            self.download_history.pop(0)
-            self.download_history.append(dl)
-            self.upload_history.pop(0)
-            self.upload_history.append(ul)
+        while self.is_running:
+            try:
+                # 获取当前字节数
+                current_download, current_upload = self.get_current_bytes()
 
-            # 刷新图表
-            self.root.after(1000, self.plot_graph)  # 每秒更新一次
-            time.sleep(1)
+                # 计算速度 (KB/s)
+                download_speed = (current_download - self.old_download) / 1024
+                upload_speed = (current_upload - self.old_upload) / 1024
 
-    def plot_graph(self):
-        self.canvas.delete("all")  # 清空画布
-        self.canvas.create_text(275, 130, text="近10秒网速趋势（KB/s）", font=("微软雅黑", 10))
+                # 更新UI
+                self.root.after(0, self.update_speed_labels, download_speed, upload_speed)
 
-        # 绘制下载速度曲线
-        x_start = 30
-        y_base = 120
-        scale_y = 2  # 纵向缩放比例（可调整曲线高度）
-        for i in range(10):
-            x1 = x_start + i * 50
-            y1 = y_base - self.download_history[i] / scale_y
-            x2 = x_start + (i + 1) * 50
-            y2 = y_base - self.download_history[i + 1] / scale_y if i < 9 else y1
-            self.canvas.create_line(x1, y1, x2, y2, fill="blue", width=2, tags="download")
+                # 更新计数器
+                self.old_download = current_download
+                self.old_upload = current_upload
 
-        # 绘制上传速度曲线
-        for i in range(10):
-            x1 = x_start + i * 50
-            y1 = y_base + self.upload_history[i] / scale_y
-            x2 = x_start + (i + 1) * 50
-            y2 = y_base + self.upload_history[i + 1] / scale_y if i < 9 else y1
-            self.canvas.create_line(x1, y1, x2, y2, fill="red", width=2, tags="upload")
+                # 等待1秒
+                time.sleep(1)
+            except Exception as e:
+                self.status_var.set(f"错误: {str(e)}")
+                time.sleep(1)
 
-        # 添加坐标轴标签
-        self.canvas.create_text(x_start - 10, y_base, text="0", anchor="e", font=("微软雅黑", 8))
-        self.canvas.create_text(x_start + 450, y_base, text="时间（秒）", font=("微软雅黑", 8))
-        self.canvas.create_line(x_start, y_base, x_start + 450, y_base, fill="black")  # 时间轴
+    def update_speed_labels(self, download_speed, upload_speed):
+        """更新速度标签显示"""
+        self.download_label.config(text=f"下载: {download_speed:.2f} KB/s")
+        self.upload_label.config(text=f"上传: {upload_speed:.2f} KB/s")
+
+    def on_close(self):
+        """窗口关闭时的处理"""
+        self.is_running = False
+        self.root.destroy()
 
 
 if __name__ == "__main__":

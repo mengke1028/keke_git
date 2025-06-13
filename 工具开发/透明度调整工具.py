@@ -59,7 +59,7 @@ def set_window_transparency(transparency):
 
 
 root = tk.Tk()
-root.title("摸鱼神器-修改窗口透明度")
+root.title("订")
 
 # 初始化窗口信息
 window_info = get_window_names()

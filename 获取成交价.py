@@ -42,7 +42,7 @@ def get_jiage(xiaoqu):
         res = requests.get(urls, headers=headers)
         res.encoding = res.apparent_encoding
         html = etree.HTML(res.text)
-        items = html.xpath('//*[@id="beike"]/div[1]/div[5]/div[1]/div[4]/ul/li')
+        items = html.xpath('//*[@id="beike"]/div[1]/div[5]/div[1]/div[3]/ul/li')
         for i in items:
             louceng = i.xpath('./div/div[3]/div[1]/text()')[1]
             louceng2 = louceng.replace(' ', '').replace('\n', '')

@@ -52,6 +52,7 @@ class BilibiliVideoDownloader:
             response = self.session.get(url)
             response.raise_for_status()  # 检查请求是否成功
             data = response.json()
+            # print(data)
 
             if data["code"] == 0:
                 self.video_info = data["data"]
@@ -119,6 +120,7 @@ class BilibiliVideoDownloader:
             self.update_progress(100, 100, "请先获取视频信息")
             return None
 
+
         if not cid:
             cid = self.video_info['cid']
 
@@ -167,7 +169,7 @@ class BilibiliVideoDownloader:
             self.update_progress(100, 100, f"获取视频链接异常: {e}")
             return None
 
-    def download_video(self, video_urls, output_dir=".", max_workers=5, only_audio=False):
+    def download_video(self, video_urls, output_dir=".", i=0 ,max_workers=5, only_audio=False):
         """下载视频或音频文件"""
         if not self.video_info:
             self.log("请先获取视频信息")
@@ -180,7 +182,7 @@ class BilibiliVideoDownloader:
             self.log(f"创建目录: {output_dir}")
 
         # 生成文件名(去除非法字符)
-        title = re.sub(r'[\\/:*?"<>|]', '_', self.video_info['title'])
+        title = re.sub(r'[\\/:*?"<>|]', '_', self.video_info['pages'][i]['part'])
 
         if only_audio:
             self.log(f"准备下载音频: {title}")
@@ -385,11 +387,18 @@ class BilibiliVideoDownloader:
         if self.stop_flag:
             return -1
 
+        def convert_size(size_bytes):
+            units = ['B', 'KB', 'MB', 'GB', 'TB']
+            unit_index = 0
+            while size_bytes >= 1024 and unit_index < len(units) - 1:
+                size_bytes /= 1024
+                unit_index += 1
+            return f"{size_bytes:.2f} {units[unit_index]}"
         try:
             # 如果文件已存在，则获取其大小
             if os.path.exists(output_path):
                 file_size = os.path.getsize(output_path)
-                self.log(f"文件已存在: {output_path}，大小: {file_size}")
+                self.log(f"文件已存在: {output_path}，大小: {convert_size(file_size)}")
                 return file_size
 
             # 开始下载
@@ -593,7 +602,7 @@ class BilibiliDownloaderGUI:
         ttk.Label(bvid_frame, text="BVID:").grid(row=0, column=0, sticky=tk.W, pady=5)
         self.bvid_entry = ttk.Entry(bvid_frame, width=40)
         self.bvid_entry.grid(row=0, column=1, sticky=(tk.W, tk.E), pady=5, padx=5)
-        self.bvid_entry.insert(0, "BV1iKwCe1Ebj")
+        self.bvid_entry.insert(0, "BV1jxKozWEbc")  # BV1iKwCe1Ebj
 
         self.get_info_btn = ttk.Button(bvid_frame, text="获取视频信息", command=self.get_video_info)
         self.get_info_btn.grid(row=0, column=2, sticky=tk.W, pady=5, padx=5)
@@ -798,31 +807,33 @@ class BilibiliDownloaderGUI:
                 if not result:
                     self.status_var.set(f"获取视频 {bvid} 的信息失败")
                     return
-
+            result = self.downloader.get_bilibili_video_info(bvid)
             # 获取视频URL
-            video_urls = self.downloader.get_video_url(quality=quality)
-            if not video_urls:
-                self.status_var.set(f"无法获取视频 {bvid} 的下载地址")
-                return
+            for i in range(len(result['pages'])):
+                cid = result['pages'][i]['cid']
+                video_urls = self.downloader.get_video_url(quality=quality, cid=cid)
+                if not video_urls:
+                    self.status_var.set(f"无法获取视频 {bvid} 的下载地址")
+                    return
 
-            # 开始下载
-            if only_audio:
-                self.status_var.set(f"正在下载音频 {bvid}...")
-            else:
-                self.status_var.set(f"正在下载视频 {bvid}...")
-
-            success = self.downloader.download_video(video_urls, save_path, only_audio=only_audio)
-
-            if success:
+                # 开始下载
                 if only_audio:
-                    self.status_var.set(f"音频 {bvid} 下载完成")
+                    self.status_var.set(f"正在下载音频 {bvid}...")
                 else:
-                    self.status_var.set(f"视频 {bvid} 下载完成")
-            else:
-                if only_audio:
-                    self.status_var.set(f"音频 {bvid} 下载失败")
+                    self.status_var.set(f"正在下载视频 {bvid}...")
+
+                success = self.downloader.download_video(video_urls, save_path,i, only_audio=only_audio)
+
+                if success:
+                    if only_audio:
+                        self.status_var.set(f"音频 {bvid} 下载完成")
+                    else:
+                        self.status_var.set(f"视频 {bvid} 下载完成")
                 else:
-                    self.status_var.set(f"视频 {bvid} 下载失败")
+                    if only_audio:
+                        self.status_var.set(f"音频 {bvid} 下载失败")
+                    else:
+                        self.status_var.set(f"视频 {bvid} 下载失败")
 
         except Exception as e:
             self.log_message(f"发生错误: {e}")
@@ -845,3 +856,9 @@ if __name__ == "__main__":
     root = tk.Tk()
     app = BilibiliDownloaderGUI(root)
     root.mainloop()
+
+
+"""
+
+BV1jxKozWEbc
+"""

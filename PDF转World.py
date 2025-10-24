@@ -1,358 +1,709 @@
-import os
+# -*- coding: utf-8 -*-
 import tkinter as tk
-from tkinter import filedialog, ttk, messagebox, scrolledtext
-import threading
-import queue
+from tkinter import ttk, filedialog, messagebox
+import os
+import PyPDF2
 from pdf2docx import Converter
-from PyPDF2 import PdfReader
-import time
+import threading
 
 
-class PDFToWordConverterApp:
+class PDFUtilityApp:
     def __init__(self, root):
         self.root = root
-        self.root.title("PDF转Word工具")
-        self.root.geometry("800x600")
-        self.root.minsize(600, 500)
-        self.root.configure(bg="#f5f7fa")
+        self.root.title("马伶俐专属工具")
+        self.root.geometry("700x550")
+        self.root.resizable(True, True)
 
-        # 设置中文字体
-        self.font_config()
+        # 窗口居中显示
+        self.center_window()
 
-        # 创建任务队列和结果队列
-        self.task_queue = queue.Queue()
-        self.result_queue = queue.Queue()
+        # 设置中文字体支持
+        self.style = ttk.Style()
+        self.style.configure("TLabel", font=("SimHei", 10))
+        self.style.configure("TButton", font=("SimHei", 10))
+        self.style.configure("TNotebook.Tab", font=("SimHei", 10))
 
-        # 创建UI
-        self.create_widgets()
+        # 创建标签页
+        self.notebook = ttk.Notebook(root)
+        self.notebook.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
-        # 启动处理线程
-        self.processing_thread = threading.Thread(target=self.process_tasks, daemon=True)
-        self.processing_thread.start()
+        # 创建三个功能标签页
+        self.tab_convert = ttk.Frame(self.notebook)
+        self.tab_split = ttk.Frame(self.notebook)
+        self.tab_merge = ttk.Frame(self.notebook)
 
-        # 绑定窗口关闭事件
-        self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
+        self.notebook.add(self.tab_convert, text="PDF转Word")
+        self.notebook.add(self.tab_split, text="PDF拆分")
+        self.notebook.add(self.tab_merge, text="PDF合并")
 
-    def font_config(self):
-        """配置字体以确保中文显示正常"""
-        # 显式导入font模块
-        import tkinter.font as font
-
-        default_font = font.nametofont("TkDefaultFont")
-        default_font.configure(family="SimHei", size=10)
-        self.root.option_add("*Font", default_font)
-
-    def create_widgets(self):
-        """创建应用程序界面"""
-        # 顶部标题
-        header_frame = tk.Frame(self.root, bg="#165DFF", height=60)
-        header_frame.pack(fill=tk.X)
-        header_frame.pack_propagate(0)
-
-        title_label = tk.Label(header_frame, text="PDF转Word工具",
-                               font=("SimHei", 16, "bold"),
-                               bg="#165DFF", fg="white")
-        title_label.pack(pady=15)
-
-        # 主内容区域
-        main_frame = tk.Frame(self.root, bg="#f5f7fa")
-        main_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
-
-        # 左侧面板 - 文件选择和设置
-        left_frame = tk.LabelFrame(main_frame, text="文件设置", bg="#f5f7fa", padx=10, pady=10)
-        left_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 10))
-
-        # PDF文件选择
-        pdf_frame = tk.Frame(left_frame, bg="#f5f7fa")
-        pdf_frame.pack(fill=tk.X, pady=(0, 10))
-
-        tk.Label(pdf_frame, text="PDF文件:", bg="#f5f7fa").pack(side=tk.LEFT, padx=(0, 10))
-
-        self.pdf_path_var = tk.StringVar()
-        pdf_entry = tk.Entry(pdf_frame, textvariable=self.pdf_path_var, width=40)
-        pdf_entry.pack(side=tk.LEFT, fill=tk.X, expand=True)
-
-        browse_btn = tk.Button(pdf_frame, text="浏览...", command=self.browse_pdf,
-                               bg="#e0e7ff", fg="#4f46e5", relief=tk.FLAT,
-                               padx=10, pady=2)
-        browse_btn.pack(side=tk.LEFT, padx=(10, 0))
-
-        # Word文件保存位置
-        word_frame = tk.Frame(left_frame, bg="#f5f7fa")
-        word_frame.pack(fill=tk.X, pady=(0, 10))
-
-        tk.Label(word_frame, text="Word文件:", bg="#f5f7fa").pack(side=tk.LEFT, padx=(0, 10))
-
-        self.word_path_var = tk.StringVar()
-        word_entry = tk.Entry(word_frame, textvariable=self.word_path_var, width=40)
-        word_entry.pack(side=tk.LEFT, fill=tk.X, expand=True)
-
-        browse_word_btn = tk.Button(word_frame, text="浏览...", command=self.browse_word,
-                                    bg="#e0e7ff", fg="#4f46e5", relief=tk.FLAT,
-                                    padx=10, pady=2)
-        browse_word_btn.pack(side=tk.LEFT, padx=(10, 0))
-
-        # 批量处理选项
-        batch_frame = tk.Frame(left_frame, bg="#f5f7fa")
-        batch_frame.pack(fill=tk.X, pady=(0, 10))
-
-        self.batch_var = tk.BooleanVar()
-        batch_check = tk.Checkbutton(batch_frame, text="批量处理文件夹中的所有PDF",
-                                     variable=self.batch_var, command=self.toggle_batch,
-                                     bg="#f5f7fa")
-        batch_check.pack(anchor=tk.W)
-
-        self.folder_path_var = tk.StringVar()
-        folder_entry = tk.Entry(batch_frame, textvariable=self.folder_path_var, width=40, state=tk.DISABLED)
-        folder_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, pady=5)
-
-        browse_folder_btn = tk.Button(batch_frame, text="浏览...", command=self.browse_folder,
-                                      bg="#e0e7ff", fg="#4f46e5", relief=tk.FLAT,
-                                      padx=10, pady=2, state=tk.DISABLED)
-        browse_folder_btn.pack(side=tk.LEFT, padx=(10, 0))
-
-        # 转换按钮
-        convert_btn = tk.Button(left_frame, text="开始转换", command=self.start_conversion,
-                                bg="#165DFF", fg="white", font=("SimHei", 12, "bold"),
-                                relief=tk.FLAT, padx=20, pady=8, cursor="hand2")
-        convert_btn.pack(pady=20)
-
-        # 右侧面板 - 进度和日志
-        right_frame = tk.LabelFrame(main_frame, text="转换进度", bg="#f5f7fa", padx=10, pady=10)
-        right_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=(10, 0))
+        # 初始化各个标签页的UI
+        self.init_convert_tab()
+        self.init_split_tab()
+        self.init_merge_tab()
 
         # 进度条
+        self.progress_frame = ttk.Frame(root)
+        self.progress_frame.pack(fill=tk.X, padx=10, pady=5)
+
         self.progress_var = tk.DoubleVar()
-        progress_bar = ttk.Progressbar(right_frame, variable=self.progress_var, length=100, mode='determinate')
-        progress_bar.pack(fill=tk.X, pady=(0, 10))
+        self.progress_bar = ttk.Progressbar(
+            self.progress_frame,
+            variable=self.progress_var,
+            maximum=100
+        )
+        self.progress_bar.pack(fill=tk.X, padx=5, pady=5)
 
-        # 状态标签
-        self.status_var = tk.StringVar(value="就绪")
-        status_label = tk.Label(right_frame, textvariable=self.status_var, bg="#f5f7fa", fg="#4b5563")
-        status_label.pack(anchor=tk.W, pady=(0, 10))
+        self.status_label = ttk.Label(self.progress_frame, text="就绪")
+        self.status_label.pack(anchor=tk.W, padx=5, pady=2)
 
-        # 日志区域
-        log_frame = tk.LabelFrame(right_frame, text="转换日志", bg="#f5f7fa", padx=5, pady=5)
-        log_frame.pack(fill=tk.BOTH, expand=True)
+    def center_window(self):
+        """将窗口居中显示在屏幕上"""
+        # 确保窗口尺寸已更新
+        self.root.update_idletasks()
 
-        self.log_text = scrolledtext.ScrolledText(log_frame, wrap=tk.WORD, bg="white", fg="#1f2937")
-        self.log_text.pack(fill=tk.BOTH, expand=True)
-        self.log_text.config(state=tk.DISABLED)
+        # 获取屏幕宽度和高度
+        screen_width = self.root.winfo_screenwidth()
+        screen_height = self.root.winfo_screenheight()
 
-        # 底部状态栏
-        status_frame = tk.Frame(self.root, bg="#e5e7eb", height=25)
-        status_frame.pack(fill=tk.X, side=tk.BOTTOM)
-        status_frame.pack_propagate(0)
+        # 获取窗口宽度和高度
+        window_width = self.root.winfo_width()
+        window_height = self.root.winfo_height()
 
-        self.status_bar_var = tk.StringVar(value="准备就绪")
-        status_bar = tk.Label(status_frame, textvariable=self.status_bar_var, bg="#e5e7eb", fg="#4b5563", anchor=tk.W)
-        status_bar.pack(fill=tk.BOTH, expand=True, padx=10)
+        # 计算居中位置
+        x = (screen_width - window_width) // 2
+        y = (screen_height - window_height) // 2
 
-    def toggle_batch(self):
-        """切换批量处理模式"""
-        if self.batch_var.get():
-            self.pdf_path_var.set("")
-            self.word_path_var.set("")
-            for widget in [self.folder_path_var, self.folder_path_var.trace_vinfo()[0][0]]:
-                widget.configure(state=tk.NORMAL)
-            for entry in [self.pdf_path_var, self.word_path_var]:
-                entry.trace_vinfo()[0][0].configure(state=tk.DISABLED)
-        else:
-            self.folder_path_var.set("")
-            for widget in [self.folder_path_var, self.folder_path_var.trace_vinfo()[0][0]]:
-                widget.configure(state=tk.DISABLED)
-            for entry in [self.pdf_path_var, self.word_path_var]:
-                entry.trace_vinfo()[0][0].configure(state=tk.NORMAL)
+        # 设置窗口位置
+        self.root.geometry(f"+{x}+{y}")
 
-    def browse_pdf(self):
-        """浏览并选择PDF文件"""
+    def init_convert_tab(self):
+        """初始化PDF转Word标签页"""
+        # 源文件选择
+        file_frame = ttk.Frame(self.tab_convert)
+        file_frame.pack(fill=tk.X, padx=10, pady=10)
+
+        ttk.Label(file_frame, text="PDF文件:").pack(side=tk.LEFT, padx=5)
+
+        self.convert_file_path = tk.StringVar()
+        ttk.Entry(file_frame, textvariable=self.convert_file_path, width=50).pack(side=tk.LEFT, padx=5)
+
+        ttk.Button(
+            file_frame,
+            text="浏览...",
+            command=self.select_convert_file
+        ).pack(side=tk.LEFT, padx=5)
+
+        # PDF密码输入
+        password_frame = ttk.Frame(self.tab_convert)
+        password_frame.pack(fill=tk.X, padx=10, pady=10)
+
+        ttk.Label(password_frame, text="PDF密码(如加密):").pack(side=tk.LEFT, padx=5)
+
+        self.pdf_password = tk.StringVar()
+        ttk.Entry(password_frame, textvariable=self.pdf_password, show="*", width=30).pack(side=tk.LEFT, padx=5)
+        ttk.Label(password_frame, text="(如无密码则留空)").pack(side=tk.LEFT, padx=5)
+
+        # 输出路径选择
+        output_frame = ttk.Frame(self.tab_convert)
+        output_frame.pack(fill=tk.X, padx=10, pady=10)
+
+        ttk.Label(output_frame, text="输出目录:").pack(side=tk.LEFT, padx=5)
+
+        self.convert_output_path = tk.StringVar()
+        ttk.Entry(output_frame, textvariable=self.convert_output_path, width=50).pack(side=tk.LEFT, padx=5)
+
+        ttk.Button(
+            output_frame,
+            text="浏览...",
+            command=self.select_convert_output
+        ).pack(side=tk.LEFT, padx=5)
+
+        # 转换按钮
+        btn_frame = ttk.Frame(self.tab_convert)
+        btn_frame.pack(fill=tk.X, padx=10, pady=20)
+
+        ttk.Button(
+            btn_frame,
+            text="开始转换",
+            command=self.start_conversion
+        ).pack(side=tk.LEFT, padx=50)
+
+    def init_split_tab(self):
+        """初始化PDF拆分标签页"""
+        # 源文件选择
+        file_frame = ttk.Frame(self.tab_split)
+        file_frame.pack(fill=tk.X, padx=10, pady=10)
+
+        ttk.Label(file_frame, text="PDF文件:").pack(side=tk.LEFT, padx=5)
+
+        self.split_file_path = tk.StringVar()
+        ttk.Entry(file_frame, textvariable=self.split_file_path, width=50).pack(side=tk.LEFT, padx=5)
+
+        ttk.Button(
+            file_frame,
+            text="浏览...",
+            command=self.select_split_file
+        ).pack(side=tk.LEFT, padx=5)
+
+        # PDF密码输入
+        password_frame = ttk.Frame(self.tab_split)
+        password_frame.pack(fill=tk.X, padx=10, pady=10)
+
+        ttk.Label(password_frame, text="PDF密码(如加密):").pack(side=tk.LEFT, padx=5)
+
+        self.split_password = tk.StringVar()
+        ttk.Entry(password_frame, textvariable=self.split_password, show="*", width=30).pack(side=tk.LEFT, padx=5)
+        ttk.Label(password_frame, text="(如无密码则留空)").pack(side=tk.LEFT, padx=5)
+
+        # 拆分设置
+        range_frame = ttk.Frame(self.tab_split)
+        range_frame.pack(fill=tk.X, padx=10, pady=10)
+
+        ttk.Label(range_frame, text="拆分范围:").pack(side=tk.LEFT, padx=5)
+
+        ttk.Label(range_frame, text="从:").pack(side=tk.LEFT, padx=5)
+        self.split_start = tk.StringVar(value="1")
+        ttk.Entry(range_frame, textvariable=self.split_start, width=5).pack(side=tk.LEFT)
+
+        ttk.Label(range_frame, text="到:").pack(side=tk.LEFT, padx=5)
+        self.split_end = tk.StringVar(value="1")
+        ttk.Entry(range_frame, textvariable=self.split_end, width=5).pack(side=tk.LEFT)
+
+        ttk.Label(range_frame, text="(页码从1开始)").pack(side=tk.LEFT, padx=5)
+
+        # 拆分方式选择
+        split_type_frame = ttk.Frame(self.tab_split)
+        split_type_frame.pack(fill=tk.X, padx=10, pady=10)
+
+        self.split_type = tk.StringVar(value="each_page")
+        ttk.Radiobutton(split_type_frame, text="按每页拆分(每页一个文件)",
+                        variable=self.split_type, value="each_page").pack(side=tk.LEFT, padx=10)
+        ttk.Radiobutton(split_type_frame, text="按范围拆分(一个文件)",
+                        variable=self.split_type, value="range").pack(side=tk.LEFT, padx=10)
+
+        # 输出路径选择
+        output_frame = ttk.Frame(self.tab_split)
+        output_frame.pack(fill=tk.X, padx=10, pady=10)
+
+        ttk.Label(output_frame, text="输出目录:").pack(side=tk.LEFT, padx=5)
+
+        self.split_output_path = tk.StringVar()
+        ttk.Entry(output_frame, textvariable=self.split_output_path, width=50).pack(side=tk.LEFT, padx=5)
+
+        ttk.Button(
+            output_frame,
+            text="浏览...",
+            command=self.select_split_output
+        ).pack(side=tk.LEFT, padx=5)
+
+        # 拆分按钮
+        btn_frame = ttk.Frame(self.tab_split)
+        btn_frame.pack(fill=tk.X, padx=10, pady=20)
+
+        ttk.Button(
+            btn_frame,
+            text="开始拆分",
+            command=self.start_split
+        ).pack(side=tk.LEFT, padx=50)
+
+        # 页码信息
+        self.page_count_label = ttk.Label(self.tab_split, text="")
+        self.page_count_label.pack(anchor=tk.W, padx=15, pady=5)
+
+    def init_merge_tab(self):
+        """初始化PDF合并标签页"""
+        # 添加文件区域
+        add_frame = ttk.Frame(self.tab_merge)
+        add_frame.pack(fill=tk.X, padx=10, pady=10)
+
+        ttk.Button(
+            add_frame,
+            text="添加PDF文件...",
+            command=self.add_merge_files
+        ).pack(side=tk.LEFT, padx=5)
+
+        ttk.Button(
+            add_frame,
+            text="移除选中",
+            command=self.remove_selected
+        ).pack(side=tk.LEFT, padx=5)
+
+        ttk.Button(
+            add_frame,
+            text="清空列表",
+            command=self.clear_merge_list
+        ).pack(side=tk.LEFT, padx=5)
+
+        # 密码设置区域
+        password_frame = ttk.Frame(self.tab_merge)
+        password_frame.pack(fill=tk.X, padx=10, pady=10)
+
+        ttk.Label(password_frame, text="文件密码(如加密):").pack(side=tk.LEFT, padx=5)
+
+        self.merge_passwords = {}  # 存储每个文件的密码
+        self.current_file_password = tk.StringVar()
+        ttk.Entry(password_frame, textvariable=self.current_file_password, show="*", width=30).pack(side=tk.LEFT,
+                                                                                                    padx=5)
+        ttk.Button(
+            password_frame,
+            text="应用到选中文件",
+            command=self.apply_password_to_selected
+        ).pack(side=tk.LEFT, padx=5)
+
+        # 文件列表
+        list_frame = ttk.Frame(self.tab_merge)
+        list_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
+
+        ttk.Label(list_frame, text="合并顺序:").pack(anchor=tk.W)
+
+        self.merge_listbox = tk.Listbox(list_frame, selectmode=tk.SINGLE, width=70, height=10)
+        self.merge_listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5)
+
+        # 滚动条
+        scrollbar = ttk.Scrollbar(list_frame, orient=tk.VERTICAL, command=self.merge_listbox.yview)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        self.merge_listbox.config(yscrollcommand=scrollbar.set)
+
+        # 上下移动按钮
+        move_frame = ttk.Frame(list_frame)
+        move_frame.pack(side=tk.RIGHT, padx=5)
+
+        ttk.Button(
+            move_frame,
+            text="上移",
+            command=lambda: self.move_item(-1)
+        ).pack(fill=tk.X, pady=2)
+
+        ttk.Button(
+            move_frame,
+            text="下移",
+            command=lambda: self.move_item(1)
+        ).pack(fill=tk.X, pady=2)
+
+        # 输出路径选择
+        output_frame = ttk.Frame(self.tab_merge)
+        output_frame.pack(fill=tk.X, padx=10, pady=10)
+
+        ttk.Label(output_frame, text="输出文件:").pack(side=tk.LEFT, padx=5)
+
+        self.merge_output_path = tk.StringVar()
+        ttk.Entry(output_frame, textvariable=self.merge_output_path, width=50).pack(side=tk.LEFT, padx=5)
+
+        ttk.Button(
+            output_frame,
+            text="浏览...",
+            command=self.select_merge_output
+        ).pack(side=tk.LEFT, padx=5)
+
+        # 合并按钮
+        btn_frame = ttk.Frame(self.tab_merge)
+        btn_frame.pack(fill=tk.X, padx=10, pady=10)
+
+        ttk.Button(
+            btn_frame,
+            text="开始合并",
+            command=self.start_merge
+        ).pack(side=tk.LEFT, padx=50)
+
+    # 选择文件和路径的函数
+    def select_convert_file(self):
         file_path = filedialog.askopenfilename(
-            filetypes=[("PDF文件", "*.pdf"), ("所有文件", "*.*")]
+            filetypes=[("PDF文件", "*.pdf")]
         )
         if file_path:
-            self.pdf_path_var.set(file_path)
-            # 自动生成Word文件路径
-            if not self.word_path_var.get() or self.word_path_var.get() == file_path.replace(".pdf", ".docx"):
-                self.word_path_var.set(file_path.replace(".pdf", ".docx"))
+            self.convert_file_path.set(file_path)
+            # 默认输出路径设置为源文件所在目录
+            self.convert_output_path.set(os.path.dirname(file_path))
+            # 清空密码输入
+            self.pdf_password.set("")
 
-    def browse_word(self):
-        """浏览并选择Word文件保存位置"""
-        if self.pdf_path_var.get():
-            initial_file = self.pdf_path_var.get().replace(".pdf", ".docx")
-            initial_dir = os.path.dirname(initial_file)
-            initial_file_name = os.path.basename(initial_file)
-        else:
-            initial_dir = ""
-            initial_file_name = ""
+    def select_convert_output(self):
+        output_dir = filedialog.askdirectory()
+        if output_dir:
+            self.convert_output_path.set(output_dir)
 
+    def select_split_file(self):
+        file_path = filedialog.askopenfilename(
+            filetypes=[("PDF文件", "*.pdf")]
+        )
+        if file_path:
+            self.split_file_path.set(file_path)
+            # 默认输出路径设置为源文件所在目录
+            self.split_output_path.set(os.path.dirname(file_path))
+            # 清空密码输入
+            self.split_password.set("")
+            # 获取页码数
+            self.update_page_count(file_path, self.split_password.get())
+
+    def select_split_output(self):
+        output_dir = filedialog.askdirectory()
+        if output_dir:
+            self.split_output_path.set(output_dir)
+
+    def add_merge_files(self):
+        file_paths = filedialog.askopenfilenames(
+            filetypes=[("PDF文件", "*.pdf")]
+        )
+        for file_path in file_paths:
+            if file_path not in self.merge_listbox.get(0, tk.END):
+                self.merge_listbox.insert(tk.END, file_path)
+                # 初始化密码为空
+                self.merge_passwords[file_path] = ""
+
+    def remove_selected(self):
+        selected = self.merge_listbox.curselection()
+        if selected:
+            file_path = self.merge_listbox.get(selected[0])
+            self.merge_listbox.delete(selected)
+            # 移除密码记录
+            if file_path in self.merge_passwords:
+                del self.merge_passwords[file_path]
+
+    def clear_merge_list(self):
+        self.merge_listbox.delete(0, tk.END)
+        self.merge_passwords.clear()
+
+    def move_item(self, direction):
+        selected = self.merge_listbox.curselection()
+        if not selected:
+            return
+
+        index = selected[0]
+        new_index = index + direction
+
+        if 0 <= new_index < self.merge_listbox.size():
+            item = self.merge_listbox.get(index)
+            self.merge_listbox.delete(index)
+            self.merge_listbox.insert(new_index, item)
+            self.merge_listbox.selection_set(new_index)
+
+    def apply_password_to_selected(self):
+        selected = self.merge_listbox.curselection()
+        if not selected:
+            messagebox.showwarning("提示", "请先选择一个文件")
+            return
+
+        file_path = self.merge_listbox.get(selected[0])
+        password = self.current_file_password.get()
+        self.merge_passwords[file_path] = password
+        messagebox.showinfo("提示", f"密码已应用到文件: {os.path.basename(file_path)}")
+
+    def select_merge_output(self):
+        default_filename = "merged.pdf"
         file_path = filedialog.asksaveasfilename(
-            defaultextension=".docx",
-            filetypes=[("Word文件", "*.docx"), ("所有文件", "*.*")],
-            initialdir=initial_dir,
-            initialfile=initial_file_name
+            defaultextension=".pdf",
+            filetypes=[("PDF文件", "*.pdf")],
+            initialfile=default_filename
         )
         if file_path:
-            self.word_path_var.set(file_path)
+            self.merge_output_path.set(file_path)
 
-    def browse_folder(self):
-        """浏览并选择文件夹"""
-        folder_path = filedialog.askdirectory()
-        if folder_path:
-            self.folder_path_var.set(folder_path)
-
-    def log(self, message):
-        """添加日志消息"""
-        self.log_text.config(state=tk.NORMAL)
-        self.log_text.insert(tk.END, message + "\n")
-        self.log_text.see(tk.END)
-        self.log_text.config(state=tk.DISABLED)
-
-    def update_status(self, message):
-        """更新状态消息"""
-        self.status_var.set(message)
-        self.status_bar_var.set(message)
-
-    def update_progress(self, value):
-        """更新进度条"""
-        self.progress_var.set(value)
-
-    def start_conversion(self):
-        """开始转换过程"""
-        # 清空日志
-        self.log_text.config(state=tk.NORMAL)
-        self.log_text.delete(1.0, tk.END)
-        self.log_text.config(state=tk.DISABLED)
-
-        # 检查输入
-        if self.batch_var.get():
-            folder_path = self.folder_path_var.get()
-            if not folder_path or not os.path.isdir(folder_path):
-                messagebox.showerror("错误", "请选择有效的文件夹路径")
-                return
-
-            # 获取所有PDF文件
-            pdf_files = [f for f in os.listdir(folder_path) if f.lower().endswith('.pdf')]
-            if not pdf_files:
-                messagebox.showinfo("信息", "所选文件夹中没有找到PDF文件")
-                return
-
-            # 添加所有PDF文件到任务队列
-            for pdf_file in pdf_files:
-                pdf_path = os.path.join(folder_path, pdf_file)
-                word_path = os.path.join(folder_path, os.path.splitext(pdf_file)[0] + ".docx")
-                self.task_queue.put((pdf_path, word_path))
-
-            total_tasks = len(pdf_files)
-            self.update_status(f"准备批量转换 {total_tasks} 个PDF文件")
-            self.log(f"找到 {total_tasks} 个PDF文件，开始批量转换...")
-
-        else:
-            pdf_path = self.pdf_path_var.get()
-            word_path = self.word_path_var.get()
-
-            if not pdf_path or not os.path.isfile(pdf_path):
-                messagebox.showerror("错误", "请选择有效的PDF文件")
-                return
-
-            if not word_path:
-                messagebox.showerror("错误", "请指定Word文件保存位置")
-                return
-
-            self.task_queue.put((pdf_path, word_path))
-            self.update_status("准备转换PDF文件")
-            self.log(f"开始转换: {pdf_path}")
-
-    def process_tasks(self):
-        """处理转换任务的线程"""
-        while True:
-            try:
-                if not self.task_queue.empty():
-                    pdf_path, word_path = self.task_queue.get()
-
-                    # 更新状态
-                    self.root.after(0, lambda p=pdf_path: self.update_status(f"正在转换: {os.path.basename(p)}"))
-
-                    try:
-                        # 执行转换
-                        success = self.convert_pdf(pdf_path, word_path)
-
-                        if success:
-                            self.root.after(0, lambda p=word_path: self.log(f"✓ 成功转换为: {p}"))
-                        else:
-                            self.root.after(0, lambda p=pdf_path: self.log(f"✗ 转换失败: {p}"))
-
-                    except Exception as e:
-                        self.root.after(0, lambda msg=str(e): self.log(f"错误: {msg}"))
-
-                    # 标记任务完成
-                    self.task_queue.task_done()
-
-                    # 更新进度
-                    if self.task_queue.empty():
-                        self.root.after(0, lambda: self.update_status("转换完成"))
-                        self.root.after(0, lambda: self.update_progress(100))
-                        self.root.after(0, lambda: self.log("所有任务已完成"))
-                else:
-                    time.sleep(0.1)  # 减少CPU使用率
-            except Exception as e:
-                self.root.after(0, lambda msg=str(e): self.log(f"处理任务时发生错误: {msg}"))
-
-    def convert_pdf(self, pdf_path, word_path):
-        """执行PDF到Word的转换"""
+    # 更新PDF页码计数（支持加密文件）
+    def update_page_count(self, file_path, password=None):
         try:
-            # 检查PDF文件是否有效
-            try:
-                with open(pdf_path, 'rb') as file:
-                    reader = PdfReader(file)
-                    total_pages = len(reader.pages)
-                    self.log(f"检测到PDF文件共有 {total_pages} 页")
+            with open(file_path, 'rb') as file:
+                reader = PyPDF2.PdfReader(file)
+                # 检查是否加密
+                if reader.is_encrypted:
+                    if password:
+                        # 尝试解密
+                        if not reader.decrypt(password):
+                            messagebox.showerror("错误", "密码错误，无法读取PDF内容")
+                            return
+                    else:
+                        messagebox.showwarning("提示", "该PDF文件已加密，请输入密码")
+                        return
 
-                    # 检查PDF是否加密
-                    if reader.is_encrypted:
-                        self.log("错误: PDF文件已加密，无法转换")
-                        return False
-            except Exception as e:
-                self.log(f"错误: 无法读取PDF文件 - {str(e)}")
-                return False
+                page_count = len(reader.pages)
+                self.page_count_label.config(text=f"PDF总页数: {page_count}")
+                self.split_end.set(str(page_count))
+        except Exception as e:
+            messagebox.showerror("错误", f"无法读取PDF文件: {str(e)}")
 
-            # 创建转换器对象
+    # 执行转换、拆分、合并的函数（在后台线程中运行）
+    def start_conversion(self):
+        pdf_path = self.convert_file_path.get()
+        output_dir = self.convert_output_path.get()
+        password = self.pdf_password.get()
+
+        if not pdf_path or not os.path.exists(pdf_path):
+            messagebox.showerror("错误", "请选择有效的PDF文件")
+            return
+
+        if not output_dir or not os.path.exists(output_dir):
+            messagebox.showerror("错误", "请选择有效的输出目录")
+            return
+
+        # 禁用所有按钮防止重复操作
+        self.disable_buttons()
+        self.status_label.config(text="正在准备转换...")
+        self.progress_var.set(0)
+
+        # 在后台线程中执行转换
+        threading.Thread(
+            target=self.perform_conversion,
+            args=(pdf_path, output_dir, password),
+            daemon=True
+        ).start()
+
+    def perform_conversion(self, pdf_path, output_dir, password):
+        try:
+            # 获取文件名（不含扩展名）
+            file_name = os.path.splitext(os.path.basename(pdf_path))[0]
+            docx_path = os.path.join(output_dir, f"{file_name}.docx")
+
+            # 检查PDF是否加密并尝试解密
+            with open(pdf_path, 'rb') as f:
+                reader = PyPDF2.PdfReader(f)
+                if reader.is_encrypted:
+                    if not password:
+                        raise Exception("PDF已加密，请提供密码")
+                    if not reader.decrypt(password):
+                        raise Exception("密码错误，无法解密PDF")
+
+                total_pages = len(reader.pages)
+
+            # 转换PDF到Word
             cv = Converter(pdf_path)
 
-            # 获取总页数（兼容新版本pdf2docx）
-            try:
-                # 尝试使用新版本方法
-                converter_pages = len(cv._pages)
-            except AttributeError:
-                # 旧版本方法
-                converter_pages = len(cv.doc_reader)
+            # 按页转换以更新进度条
+            for i in range(total_pages):
+                # 传递密码进行转换（如果有）
+                kwargs = {"start": i, "end": i + 1}
+                if password:
+                    kwargs["password"] = password
 
-            # 如果pdf2docx获取的页数为0，使用PyPDF2的结果
-            if converter_pages == 0:
-                converter_pages = total_pages
-
-            self.log(f"开始转换全部 {converter_pages} 页")
-
-            # 转换并显示进度
-            self.root.after(0, lambda: self.update_progress(0))
-
-            # 执行转换
-            cv.convert(word_path)
+                cv.convert(docx_path, **kwargs)
+                progress = (i + 1) / total_pages * 100
+                self.progress_var.set(progress)
+                self.status_label.config(text=f"正在转换第 {i + 1}/{total_pages} 页")
 
             cv.close()
-            self.log(f"成功转换 {converter_pages} 页")
-            self.update_progress(100)
-            return True
-        except Exception as e:
-            self.log(f"转换过程中发生错误: {str(e)}")
-            return False
 
-    def on_closing(self):
-        """处理窗口关闭事件"""
-        if messagebox.askokcancel("退出", "确定要退出应用程序吗?"):
-            self.root.destroy()
+            self.root.after(0, lambda: self.status_label.config(text="转换完成!"))
+            self.root.after(0, lambda: self.progress_var.set(100))
+            self.root.after(0, lambda: messagebox.showinfo("成功", f"转换完成!\n文件保存至: {docx_path}"))
+        except Exception as e:
+            print(e)
+            self.root.after(0, lambda: messagebox.showerror("转换失败", f"转换过程中出错: {str(e)}"))
+            self.root.after(0, lambda: self.status_label.config(text="转换失败"))
+        finally:
+            self.root.after(0, self.enable_buttons)
+
+    def start_split(self):
+        pdf_path = self.split_file_path.get()
+        output_dir = self.split_output_path.get()
+        password = self.split_password.get()
+
+        if not pdf_path or not os.path.exists(pdf_path):
+            messagebox.showerror("错误", "请选择有效的PDF文件")
+            return
+
+        if not output_dir or not os.path.exists(output_dir):
+            messagebox.showerror("错误", "请选择有效的输出目录")
+            return
+
+        try:
+            start_page = int(self.split_start.get())
+            end_page = int(self.split_end.get())
+
+            if start_page < 1 or end_page < start_page:
+                raise ValueError("页码范围无效")
+        except ValueError as e:
+            messagebox.showerror("错误", f"页码设置错误: {str(e)}")
+            return
+
+        # 禁用所有按钮防止重复操作
+        self.disable_buttons()
+        self.status_label.config(text="正在准备拆分...")
+        self.progress_var.set(0)
+
+        # 在后台线程中执行拆分
+        threading.Thread(
+            target=self.perform_split,
+            args=(pdf_path, output_dir, start_page, end_page, password),
+            daemon=True
+        ).start()
+
+    def perform_split(self, pdf_path, output_dir, start_page, end_page, password):
+        try:
+            with open(pdf_path, 'rb') as file:
+                reader = PyPDF2.PdfReader(file)
+
+                # 检查加密状态并解密
+                if reader.is_encrypted:
+                    if not password:
+                        raise Exception("PDF已加密，请提供密码")
+                    if not reader.decrypt(password):
+                        raise Exception("密码错误，无法解密PDF")
+
+                total_pages = len(reader.pages)
+
+                if end_page > total_pages:
+                    end_page = total_pages
+                    self.root.after(0, lambda: self.split_end.set(str(total_pages)))
+
+                # 获取文件名（不含扩展名）
+                file_name = os.path.splitext(os.path.basename(pdf_path))[0]
+                total_pages_to_process = end_page - start_page + 1
+                split_type = self.split_type.get()
+
+                if split_type == "each_page":
+                    # 按每页拆分，每页生成一个文件
+                    for i in range(start_page - 1, end_page):
+                        writer = PyPDF2.PdfWriter()
+                        writer.add_page(reader.pages[i])
+
+                        # 生成文件名，包含原始文件名和页码
+                        page_number = i + 1
+                        output_path = os.path.join(output_dir, f"{file_name}_page_{page_number}.pdf")
+
+                        with open(output_path, 'wb') as output_file:
+                            writer.write(output_file)
+
+                        # 更新进度
+                        progress = (i - start_page + 2) / total_pages_to_process * 100
+                        self.root.after(0, lambda p=progress: self.progress_var.set(p))
+                        self.root.after(0, lambda p=page_number, t=end_page:
+                        self.status_label.config(text=f"正在拆分第 {p}/{t} 页"))
+
+                    self.root.after(0, lambda: messagebox.showinfo(
+                        "成功",
+                        f"拆分完成!\n共生成 {total_pages_to_process} 个文件\n保存至: {output_dir}"
+                    ))
+                else:
+                    # 按范围拆分，生成一个文件
+                    writer = PyPDF2.PdfWriter()
+
+                    # 添加指定范围的页面
+                    for i in range(start_page - 1, end_page):
+                        writer.add_page(reader.pages[i])
+                        progress = (i - start_page + 2) / total_pages_to_process * 100
+                        self.root.after(0, lambda p=progress: self.progress_var.set(p))
+
+                    # 保存拆分后的PDF
+                    output_path = os.path.join(output_dir, f"{file_name}_pages_{start_page}-{end_page}.pdf")
+
+                    with open(output_path, 'wb') as output_file:
+                        writer.write(output_file)
+
+                    self.root.after(0, lambda: messagebox.showinfo(
+                        "成功",
+                        f"拆分完成!\n文件保存至: {output_path}"
+                    ))
+
+                self.root.after(0, lambda: self.status_label.config(text="拆分完成!"))
+                self.root.after(0, lambda: self.progress_var.set(100))
+
+        except Exception as e:
+            self.root.after(0, lambda: messagebox.showerror("拆分失败", f"拆分过程中出错: {str(e)}"))
+            self.root.after(0, lambda: self.status_label.config(text="拆分失败"))
+        finally:
+            self.root.after(0, self.enable_buttons)
+
+    def start_merge(self):
+        files = self.merge_listbox.get(0, tk.END)
+        output_path = self.merge_output_path.get()
+
+        if not files:
+            messagebox.showerror("错误", "请添加至少一个PDF文件")
+            return
+
+        if not output_path:
+            messagebox.showerror("错误", "请选择输出文件路径")
+            return
+
+        # 检查所有文件是否存在
+        for file in files:
+            if not os.path.exists(file):
+                messagebox.showerror("错误", f"文件不存在: {file}")
+                return
+
+        # 禁用所有按钮防止重复操作
+        self.disable_buttons()
+        self.status_label.config(text="正在准备合并...")
+        self.progress_var.set(0)
+
+        # 在后台线程中执行合并
+        threading.Thread(
+            target=self.perform_merge,
+            args=(files, output_path, self.merge_passwords),
+            daemon=True
+        ).start()
+
+    def perform_merge(self, files, output_path, passwords):
+        try:
+            writer = PyPDF2.PdfWriter()
+            total_files = len(files)
+            total_pages = 0
+
+            for i, file_path in enumerate(files):
+                with open(file_path, 'rb') as file:
+                    reader = PyPDF2.PdfReader(file)
+
+                    # 检查加密状态并解密
+                    if reader.is_encrypted:
+                        password = passwords.get(file_path, "")
+                        if not password:
+                            raise Exception(f"文件 '{os.path.basename(file_path)}' 已加密，请提供密码")
+                        if not reader.decrypt(password):
+                            raise Exception(f"文件 '{os.path.basename(file_path)}' 密码错误")
+
+                    # 添加所有页面
+                    for page in reader.pages:
+                        writer.add_page(page)
+                        total_pages += 1
+
+                # 更新进度
+                progress = (i + 1) / total_files * 100
+                self.root.after(0, lambda p=progress: self.progress_var.set(p))
+                self.root.after(0, lambda i=i + 1, t=total_files: self.status_label.config(text=f"正在合并第 {i}/{t} 个文件"))
+
+            # 保存合并后的PDF
+            with open(output_path, 'wb') as output_file:
+                writer.write(output_file)
+
+            self.root.after(0, lambda: self.status_label.config(text="合并完成!"))
+            self.root.after(0, lambda: self.progress_var.set(100))
+            self.root.after(0, lambda: messagebox.showinfo("成功", f"合并完成!\n共合并 {total_pages} 页\n文件保存至: {output_path}"))
+        except Exception as e:
+            self.root.after(0, lambda: messagebox.showerror("合并失败", f"合并过程中出错: {str(e)}"))
+            self.root.after(0, lambda: self.status_label.config(text="合并失败"))
+        finally:
+            self.root.after(0, self.enable_buttons)
+
+    # 禁用/启用所有按钮
+    def disable_buttons(self):
+        for frame in [self.tab_convert, self.tab_split, self.tab_merge]:
+            for widget in frame.winfo_children():
+                if isinstance(widget, ttk.Button) or isinstance(widget, tk.Button):
+                    widget.config(state=tk.DISABLED)
+
+    def enable_buttons(self):
+        for frame in [self.tab_convert, self.tab_split, self.tab_merge]:
+            for widget in frame.winfo_children():
+                if isinstance(widget, ttk.Button) or isinstance(widget, tk.Button):
+                    widget.config(state=tk.NORMAL)
 
 
 if __name__ == "__main__":
-    root = tk.Tk()
-    app = PDFToWordConverterApp(root)
-    root.mainloop()    
+    # 检查并提示需要安装的库
+    required_libraries = {
+        "PyPDF2": "pypdf2",
+        "pdf2docx": "pdf2docx"
+    }
+
+    missing = []
+    for lib, pkg in required_libraries.items():
+        try:
+            __import__(lib)
+        except ImportError:
+            missing.append(pkg)
+
+    if missing:
+        print("检测到缺少必要的库，请先安装：")
+        print(f"pip install {' '.join(missing)}")
+    else:
+        root = tk.Tk()
+        app = PDFUtilityApp(root)
+        root.mainloop()

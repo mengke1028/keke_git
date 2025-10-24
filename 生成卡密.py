@@ -3,7 +3,7 @@ import string
 
 # 定义激活码长度和生成数量
 code_length = 20
-code_count = 10
+code_count = 30
 
 # 定义字符集
 characters = string.ascii_letters + string.digits

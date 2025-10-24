@@ -1,0 +1,254 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>笔趣阁</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        form {
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center; /* 让表单内元素水平居中 */
+        }
+
+        label {
+            width: 100%;
+            margin-bottom: 5px;
+        }
+
+        input[type="text"],
+        input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+        }
+
+        input[type="submit"] {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin: 0 10px; /* 为按钮添加左右边距，使其居中更美观 */
+        }
+
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+
+       .upload-button {
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-left: auto;
+        }
+
+       .upload-button:hover {
+            background-color: #218838;
+        }
+
+       .message {
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+        }
+
+       .message strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+       .timestamp {
+            font-size: 0.8em;
+            color: #777;
+        }
+
+      .welcome {
+            text-align: center;
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+
+       .tip {
+            color: #ff6600;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        #emoji-picker {
+            margin-bottom: -5px;
+            display: inline-block;
+            margin-left: 5px; /* 微调表情包位置 */
+            vertical-align: middle; /* 让表情包与按钮垂直居中对齐 */
+        }
+
+        .emoji-img {
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            margin-right: 5px;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        #message {
+            min-height: 60px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            width: 100%;
+            box-sizing: border-box;
+            margin-bottom: 15px;
+            outline: none;
+            background-color: white; /* 添加白色背景样式 */
+            display: inline-flex;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+       .message p {
+            display: inline-flex;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+       .message p img {
+            display: inline-flex;
+            align-items: center;
+        }
+    </style>
+    <script>
+        function insertEmoji(imgSrc) {
+            const messageInput = document.getElementById('message');
+            const imgTag = `<img src="${imgSrc}" alt="emoji" width="30" height="30">`;
+            const selection = window.getSelection();
+            if (selection.rangeCount > 0) {
+                const range = selection.getRangeAt(0);
+                const img = document.createElement('img');
+                img.src = imgSrc;
+                img.alt = 'emoji';
+                img.width = 30;
+                img.height = 30;
+                range.insertNode(img);
+                range.setStartAfter(img);
+                range.setEndAfter(img);
+                selection.removeAllRanges();
+                selection.addRange(range);
+            } else {
+                messageInput.innerHTML += imgTag;
+            }
+            messageInput.focus();
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const nameInput = document.getElementById('name');
+            const storedName = localStorage.getItem('username');
+
+            if (storedName) {
+                nameInput.value = storedName;
+            }
+
+            const form = document.querySelector('form');
+            const messageList = document.querySelector('.message-list');
+            const messageInput = document.getElementById('message');
+
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                const formData = new FormData(form);
+                formData.set('message', messageInput.innerHTML);
+                const name = formData.get('name');
+                const message = formData.get('message');
+                localStorage.setItem('username', name);
+
+                fetch('/add_message', {
+                    method: 'POST',
+                    body: formData
+                })
+               .then(response => response.text())
+               .then(data => {
+                    console.log(data);
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(data, 'text/html');
+                    const newMessages = doc.querySelectorAll('.message');
+
+                    messageList.innerHTML = '';
+
+                    newMessages.forEach(messageElement => {
+                        messageList.appendChild(messageElement);
+                    });
+                    messageInput.innerHTML = '';
+                    document.getElementById('image').value = '';
+                })
+               .catch(error => {
+                    console.error('Error:', error);
+                });
+            });
+
+            let inactivityTimer;
+            const inactivityTimeout = 30000;
+
+            function resetInactivityTimer() {
+                clearTimeout(inactivityTimer);
+                inactivityTimer = setTimeout(() => {
+                    document.body.innerHTML = '';
+                    window.location.href = 'https://www.biquai.cc/';
+                }, inactivityTimeout);
+            }
+
+            document.addEventListener('mousemove', resetInactivityTimer);
+            document.addEventListener('keydown', resetInactivityTimer);
+            document.addEventListener('click', resetInactivityTimer);
+
+            resetInactivityTimer();
+        });
+    </script>
+</head>
+
+<body>
+    <div class="welcome">欢迎slut</div>
+    <h1>留言板</h1>
+    <form method="post" action="{{ url_for('add_message') }}" enctype="multipart/form-data">
+        <label for="name">姓名:</label><br>
+        <input type="text" id="name" name="name" required placeholder="请输入您的姓名"><br>
+        <label for="message">留言:</label><br>
+        <div id="message" contenteditable="true" placeholder="请输入您的留言内容"></div>
+        <label for="image">上传图片:</label><br>
+        <input type="file" id="image" name="image" placeholder="可选，上传相关图片"><br>
+        <input type="submit" value="提交留言">
+        <div id="emoji-picker">
+            <img class="emoji-img" src="https://img2.baidu.com/it/u=3528365300,3722631108&fm=253&fmt=auto&app=120&f=JPEG?w=243&h=243" alt="emoji" onclick="insertEmoji('https://img2.baidu.com/it/u=3528365300,3722631108&fm=253&fmt=auto&app=120&f=JPEG?w=243&h=243')">
+        </div>
+        <button class="upload-button" onclick="window.location.href='http://172.81.247.38:1116'">上传文件</button>
+    </form>
+    <div class="message-list">
+        {% for message in messages %}
+        <div class="message">
+            <strong>{{ message[1] }}</strong>
+            <p>{{ message[2] | safe }}</p>
+            <span class="timestamp">{{ message[3] }}</span>
+            {% if message[4] %}
+            <img src="{{ url_for('uploaded_file', filename=message[4]) }}" style="max-width: 100%;">
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</body>
+
+</html>

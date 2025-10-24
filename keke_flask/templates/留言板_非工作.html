@@ -1,0 +1,288 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>笔趣阁</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        form {
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+        }
+
+        input[type="submit"] {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+
+       .message {
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+        }
+
+       .message strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+       .timestamp {
+            font-size: 0.8em;
+            color: #777;
+        }
+
+       .welcome {
+            text-align: center;
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+
+       .upload-button {
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-left: auto;
+        }
+
+       .upload-button:hover {
+            background-color: #218838;
+        }
+
+        #emoji-picker {
+            margin-bottom: -5px;
+            display: inline-block;
+            margin-left: 5px;
+            vertical-align: middle;
+        }
+
+       .emoji-img {
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            margin-right: 5px;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        #message {
+            min-height: 60px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            width: 100%;
+            box-sizing: border-box;
+            margin-bottom: 15px;
+            outline: none;
+            background-color: white;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        #message * {
+            vertical-align: middle;
+        }
+
+       .message p {
+            display: inline-flex;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+       .message p img {
+            display: inline-flex;
+            align-items: center;
+        }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // 清空页面内容
+            document.body.innerHTML = '';
+
+            // 弹出 prompt 获取访问码
+            let userInput = prompt('请输入访问码：');
+
+            if (userInput === null) {
+                // 用户取消输入，跳转
+                window.location.href = 'https://www.biquai.cc/';
+            } else {
+                // 发送到后端验证
+                fetch('/verify-access', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code: userInput })
+                })
+               .then(res => res.json())
+               .then(data => {
+                    if (data.valid) {
+                        // 验证通过，渲染主页面
+                        renderMainPage();
+                    } else {
+                        // 验证失败，跳转
+                        window.location.href = 'https://www.biquai.cc/';
+                    }
+                })
+               .catch(err => {
+                    console.error('验证请求失败:', err);
+                    window.location.href = 'https://www.biquai.cc/';
+                });
+            }
+        });
+
+        // 渲染主页面
+        function renderMainPage() {
+            const originalHTML = `
+                <div class="welcome">欢迎</div>
+                <h1>留言板</h1>
+                <form method="post" action="{{ url_for('add_message') }}" enctype="multipart/form-data">
+                    <div id="name-input">
+                        <label for="name">姓名:</label><br>
+                        <input type="text" id="name" name="name" required><br>
+                    </div>
+                    <label for="message">留言:</label><br>
+                    <div id="message" contenteditable="true" placeholder="请输入您的留言内容"></div>
+                    <label for="image">上传图片:</label><br>
+                    <input type="file" id="image" name="image"><br>
+                    <input type="submit" value="提交留言">
+                    <div id="emoji-picker">
+                        <img class="emoji-img" src="https://img2.baidu.com/it/u=3528365300,3722631108&fm=253&fmt=auto&app=120&f=JPEG?w=243&h=243" alt="emoji" onclick="insertEmoji('https://img2.baidu.com/it/u=3528365300,3722631108&fm=253&fmt=auto&app=120&f=JPEG?w=243&h=243')">
+                    </div>
+                    <button class="upload-button" onclick="window.location.href='http://172.81.247.38:1116'">上传文件</button>
+                </form>
+                <div class="message-list">
+                    {% for message in messages %}
+                    <div class="message">
+                        <strong>{{ message[1] }}</strong>
+                        <p>{{ message[2] | safe }}</p>
+                        <span class="timestamp">{{ message[3] }}</span>
+                        {% if message[4] %}
+                        <img src="{{ url_for('uploaded_file', filename=message[4]) }}" style="max-width: 100%;">
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            `;
+            document.body.innerHTML = originalHTML;
+
+            const nameInput = document.getElementById('name');
+            const storedName = localStorage.getItem('username');
+
+            if (storedName) {
+                nameInput.value = storedName;
+            }
+
+            const form = document.querySelector('form');
+            const messageList = document.querySelector('.message-list');
+            const messageInput = document.getElementById('message');
+
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                const formData = new FormData(form);
+                formData.set('message', messageInput.innerHTML);
+                const name = formData.get('name');
+                const message = formData.get('message');
+                localStorage.setItem('username', name);
+
+                fetch('/add_message', {
+                    method: 'POST',
+                    body: formData
+                })
+               .then(response => response.text())
+               .then(data => {
+                    console.log(data);
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(data, 'text/html');
+                    const newMessages = doc.querySelectorAll('.message');
+
+                    messageList.innerHTML = '';
+                    newMessages.forEach(messageElement => {
+                        messageList.appendChild(messageElement);
+                    });
+                    messageInput.innerHTML = '';
+                    document.getElementById('image').value = '';
+                })
+               .catch(error => {
+                    console.error('Error:', error);
+                });
+            });
+
+            // 定义定时器变量和超时时间
+            let inactivityTimer;
+            const inactivityTimeout = 30000; // 30秒
+
+            // 重置定时器的函数
+            function resetInactivityTimer() {
+                clearTimeout(inactivityTimer);
+                inactivityTimer = setTimeout(() => {
+                    document.body.innerHTML = '';
+                    window.location.href = 'https://www.muyewx.com/';
+                }, inactivityTimeout);
+            }
+
+            // 监听用户活动事件
+            document.addEventListener('mousemove', resetInactivityTimer);
+            document.addEventListener('keydown', resetInactivityTimer);
+            document.addEventListener('click', resetInactivityTimer);
+
+            // 初始化定时器
+            resetInactivityTimer();
+        }
+
+        function insertEmoji(imgSrc) {
+            const messageInput = document.getElementById('message');
+            const selection = window.getSelection();
+            if (selection.rangeCount > 0) {
+                const range = selection.getRangeAt(0);
+                const img = document.createElement('img');
+                img.src = imgSrc;
+                img.alt = 'emoji';
+                img.width = 30;
+                img.height = 30;
+                range.insertNode(img);
+                range.setStartAfter(img);
+                range.setEndAfter(img);
+                selection.removeAllRanges();
+                selection.addRange(range);
+            } else {
+                messageInput.innerHTML += `<img src="${imgSrc}" alt="emoji" width="30" height="30">`;
+            }
+            messageInput.focus();
+        }
+    </script>
+</head>
+
+<body>
+</body>
+
+</html>

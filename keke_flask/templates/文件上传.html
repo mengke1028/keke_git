@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文件上传</title>
+    <style>
+        /* 你的原有样式保持不变 */
+        body {
+            font-family: Arial, sans-serif;
+            padding: 15px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        #progressBar {
+            width: 100%;
+            max-width: 300px;
+            height: 20px;
+            background-color: #f3f3f3;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        #progress {
+            height: 100%;
+            background-color: #4CAF50;
+            width: 0%;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid #ddd;
+        }
+
+        th,
+        td {
+            padding: 8px;
+            text-align: left;
+        }
+
+        @media (max-width: 600px) {
+            table,
+            thead,
+            tbody,
+            th,
+            td,
+            tr {
+                display: block;
+            }
+
+            thead tr {
+                position: absolute;
+                top: -9999px;
+                left: -9999px;
+            }
+
+            tr {
+                margin-bottom: 15px;
+                border: 1px solid #ccc;
+            }
+
+            td {
+                border: none;
+                border-bottom: 1px solid #eee;
+                position: relative;
+                padding-left: 50%;
+            }
+
+            td:before {
+                position: absolute;
+                left: 6px;
+                width: 45%;
+                padding-right: 10px;
+                white-space: nowrap;
+                font-weight: bold;
+            }
+
+            td:nth-of-type(1):before {
+                content: "文件名:";
+            }
+
+            td:nth-of-type(2):before {
+                content: "文件大小:";
+            }
+
+            td:nth-of-type(3):before {
+                content: "上传时间:";
+            }
+
+            td:nth-of-type(4):before {
+                content: "上传状态:";
+            }
+
+            td:nth-of-type(5):before {
+                content: "操作:";
+            }
+
+            button {
+                padding: 10px 15px;
+                margin: 5px;
+            }
+        }
+
+        #previewModal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.9);
+        }
+
+        #previewImage {
+            margin: auto;
+            display: block;
+            width: 90%;
+            max-width: 700px;
+            margin-top: 20%;
+        }
+
+        #closeModal {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>上传文件</h1>
+    <input type="file" id="fileInput" />
+    <button id="uploadButton">上传</button>
+    <div>
+        <p>总进度: <span id="totalProgress">0%</span></p>
+        <div id="progressBar">
+            <div id="progress"></div>
+        </div>
+    </div>
+    <audio id="audioPlayer" controls></audio>
+    <table id="fileTable">
+        <thead>
+            <tr>
+                <th>文件名</th>
+                <th>文件大小</th>
+                <th>上传时间</th>
+                <th>上传状态</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody id="fileList"></tbody>
+    </table>
+
+    <div id="previewModal">
+        <span id="closeModal">&times;</span>
+        <img id="previewImage" src="" alt="预览图片">
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始隐藏所有内容
+            document.body.style.display = 'none';
+
+            // 弹出 prompt 获取访问码
+            let userInput = prompt('请输入访问码：');
+
+            if (userInput === null) {
+                // 用户取消输入，跳转
+                window.location.href = 'https://www.biquai.cc/';
+            } else {
+                // 发送到后端验证
+                fetch('/verify-access', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code: userInput })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.valid) {
+                        // 验证通过，显示页面并初始化上传功能
+                        document.body.style.display = 'block';
+                        initFileUpload();
+                    } else {
+                        // 验证失败，跳转
+                        window.location.href = 'https://www.biquai.cc/';
+                    }
+                })
+                .catch(err => {
+                    console.error('验证请求失败:', err);
+                    window.location.href = 'https://www.biquai.cc/';
+                });
+            }
+        });
+
+        // 文件上传功能初始化函数（保持不变）
+        function initFileUpload() {
+            const fileInput = document.getElementById('fileInput');
+            const uploadButton = document.getElementById('uploadButton');
+            const totalProgressSpan = document.getElementById('totalProgress');
+            const progressBar = document.getElementById('progress');
+            const fileList = document.getElementById('fileList');
+            const audioPlayer = document.getElementById('audioPlayer');
+            const previewModal = document.getElementById('previewModal');
+            const previewImage = document.getElementById('previewImage');
+            const closeModal = document.getElementById('closeModal');
+
+            closeModal.addEventListener('click', () => {
+                previewModal.style.display = 'none';
+            });
+
+            function formatDateTime(timestamp) {
+                const date = new Date(timestamp);
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                const hours = String(date.getHours()).padStart(2, '0');
+                const minutes = String(date.getMinutes()).padStart(2, '0');
+                const seconds = String(date.getSeconds()).padStart(2, '0');
+                return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+            }
+
+            fetch('/get_audio_files')
+                .then(response => response.json())
+                .then(data => {
+                    data.files.forEach(file => {
+                        const row = document.createElement('tr');
+                        const filenameCell = document.createElement('td');
+                        const sizeCell = document.createElement('td');
+                        const timeCell = document.createElement('td');
+                        const statusCell = document.createElement('td');
+                        const actionCell = document.createElement('td');
+
+                        filenameCell.textContent = file.name;
+                        sizeCell.textContent = (file.size / (1024 * 1024)).toFixed(2) + 'MB';
+                        const uploadTime = file.uploadTime ? formatDateTime(file.uploadTime) : '未知';
+                        timeCell.textContent = uploadTime;
+                        statusCell.textContent = '已上传';
+
+                        const downloadButton = document.createElement('button');
+                        downloadButton.textContent = '下载';
+                        downloadButton.addEventListener('click', () => {
+                            window.location.href = `/download/${file.name}`;
+                        });
+                        actionCell.appendChild(downloadButton);
+
+                        const isAudioFile = file.name.endsWith('.mp3') || file.name.endsWith('.wav');
+                        if (isAudioFile) {
+                            const playButton = document.createElement('button');
+                            playButton.textContent = '播放';
+                            playButton.addEventListener('click', () => {
+                                audioPlayer.src = `/uploads1/${file.name}`;
+                                audioPlayer.load();
+                                audioPlayer.play();
+                            });
+                            actionCell.appendChild(playButton);
+                        }
+
+                        const isJpgFile = file.name.endsWith('.jpg');
+                        if (isJpgFile) {
+                            const previewButton = document.createElement('button');
+                            previewButton.textContent = '预览';
+                            previewButton.addEventListener('click', () => {
+                                previewImage.src = `/uploads1/${file.name}`;
+                                previewModal.style.display = 'block';
+                            });
+                            actionCell.appendChild(previewButton);
+                        }
+
+                        row.appendChild(filenameCell);
+                        row.appendChild(sizeCell);
+                        row.appendChild(timeCell);
+                        row.appendChild(statusCell);
+                        row.appendChild(actionCell);
+
+                        fileList.appendChild(row);
+                    });
+                })
+                .catch(error => {
+                    console.error('获取音频文件列表失败:', error);
+                });
+
+            uploadButton.addEventListener('click', () => {
+                const file = fileInput.files[0];
+                if (file) {
+                    const formData = new FormData();
+                    formData.append('file', file);
+
+                    const xhr = new XMLHttpRequest();
+                    xhr.open('POST', '/upload', true);
+
+                    xhr.upload.addEventListener('progress', (e) => {
+                        if (e.lengthComputable) {
+                            const percentComplete = (e.loaded / e.total) * 100;
+                            progressBar.style.width = percentComplete + '%';
+                            totalProgressSpan.textContent = percentComplete.toFixed(2) + '%';
+                        }
+                    });
+
+                    xhr.addEventListener('load', () => {
+                        if (xhr.status === 200) {
+                            const row = document.createElement('tr');
+                            const filenameCell = document.createElement('td');
+                            const sizeCell = document.createElement('td');
+                            const timeCell = document.createElement('td');
+                            const statusCell = document.createElement('td');
+                            const actionCell = document.createElement('td');
+
+                            filenameCell.textContent = file.name;
+                            sizeCell.textContent = (file.size / 1024 / 1024).toFixed(2) + 'MB';
+                            const currentTime = formatDateTime(Date.now());
+                            timeCell.textContent = currentTime;
+                            statusCell.textContent = '上传成功';
+
+                            const downloadButton = document.createElement('button');
+                            downloadButton.textContent = '下载';
+                            downloadButton.addEventListener('click', () => {
+                                window.location.href = `/download/${file.name}`;
+                            });
+                            actionCell.appendChild(downloadButton);
+
+                            const isAudioFile = file.name.endsWith('.mp3') || file.name.endsWith('.wav');
+                            if (isAudioFile) {
+                                const playButton = document.createElement('button');
+                                playButton.textContent = '播放';
+                                playButton.addEventListener('click', () => {
+                                    audioPlayer.src = `/uploads1/${file.name}`;
+                                    audioPlayer.load();
+                                    audioPlayer.play();
+                                });
+                                actionCell.appendChild(playButton);
+                            }
+
+                            const isJpgFile = file.name.endsWith('.jpg');
+                            if (isJpgFile) {
+                                const previewButton = document.createElement('button');
+                                previewButton.textContent = '预览';
+                                previewButton.addEventListener('click', () => {
+                                    previewImage.src = `/uploads1/${file.name}`;
+                                    previewModal.style.display = 'block';
+                                });
+                                actionCell.appendChild(previewButton);
+                            }
+
+                            row.appendChild(filenameCell);
+                            row.appendChild(sizeCell);
+                            row.appendChild(timeCell);
+                            row.appendChild(statusCell);
+                            row.appendChild(actionCell);
+
+                            fileList.appendChild(row);
+
+                            if (confirm('上传完成，点击确定刷新页面。')) {
+                                location.reload();
+                            }
+                        }
+                    });
+
+                    xhr.addEventListener('error', () => {
+                        console.error('上传失败');
+                    });
+
+                    xhr.send(formData);
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>

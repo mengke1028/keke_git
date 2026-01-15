@@ -9,9 +9,11 @@ import ast
 """
 手动查看 https://quote.cngold.org/gjs/swhj_zghj.html
 """
+
+
 class Mai:
     def jinjia(self, data):
-        time_tag = int(time.time()*1000)
+        time_tag = int(time.time() * 1000)
 
         url = 'https://api.jijinhao.com/quoteCenter/realTime.htm?codes=JO_52683,JO_52684,JO_52685,&_={}'.format(
             time_tag)
@@ -34,13 +36,14 @@ class Mai:
         # print(res.text)
         datas = (res.text[30:])
         JO_52683 = None
-        datas_json = ast.literal_eval(str("{"+datas))  # 字符串形式的json 直接转成json
+        datas_json = ast.literal_eval(str("{" + datas))  # 字符串形式的json 直接转成json
         for jo in ['JO_52683', 'JO_52684', 'JO_52685']:
             if jo == 'JO_52683':
                 JO_52683 = datas_json[jo]['q2']
-            jichu =datas_json[jo]['q2']
+            jichu = datas_json[jo]['q2']
             print(datas_json[jo]['showName'], jichu)
         return JO_52683
+
 
 if __name__ == '__main__':
     current_time = datetime.now().strftime("%Y-%m-%d")

@@ -1,0 +1,835 @@
+
+
+
+
+
+
+
+
+
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta id="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"
+          name="viewport"/>
+    <meta name="apple-themes-web-app-capable" content="yes">
+    <meta content="yes" name="apple-mobile-web-app-capable"/>
+    <meta content="black" name="apple-mobile-web-app-status-bar-style"/>
+    <meta content="telephone=no" name="format-detection"/>
+    <meta content="email=no" name="format-detection"/>
+    <link rel="stylesheet" href="/gh/style/mian2.3.css"
+          type="text/css" media="all">
+    
+    
+    <script src="/gh/js/jquery-8888.min.js"></script>
+    <script src="/gh/js/common.js"></script>
+    <script src="/gh/js/scaling.js?v=1768461958017"></script>
+    <script type="text/javascript" src="/gh/js/highcharts.js" charset="UTF-8"></script>
+    <style>
+        .footer {
+            color:red; position:fixed; bottom:0; width: 100%;  max-width: 640px;z-index:999;  overflow:hidden;background-color: #FFFFFF;
+        }
+        #left {
+            width: 49%;
+            height: 80px;
+            float: left;
+            text-align: center;
+            font-size: 22px;
+            color: #666666;
+            border-right: 1px solid #e5e5e5;
+            border-top:1px solid #e5e5e5;
+            background-color: #FFFFFF;
+        }
+        #right {
+            width:50%;
+            height: 80px;
+            float: right;
+            text-align: center;
+            font-size: 22px;
+            color: #666666;
+            border-top:1px solid #e5e5e5;
+            background-color: #FFFFFF;
+        }
+    </style>
+</head>
+<body>
+
+<div id="cursor">
+    <div class="footer">
+        <div id="left" onclick="window.location.href='/gh/index/index.ha'"><img
+                src="/gh/images/tab_home_on.png">
+
+            <p>首页</p></div>
+        <div id="right" onclick="window.location.href='/gh/user/userCenter.ha'"><img
+                src="/gh/images/tab_user_off.png">
+            <p>我的</p></div>
+    </div>
+</div>
+
+</body>
+<script>
+    var scrollTop = 0;
+    $('.filter-btn').click(function () {
+        if (window.confirm('返回主页？')) {
+            window.location.href = '/gh/index/index.ha';
+        }
+    });
+    $(window).scroll(function () {
+        if ($(this).scrollTop() > scrollTop) {
+            $('.filter-btn').fadeOut(1000);
+        } else {
+            $('.filter-btn').fadeIn(1000);
+
+        }
+        scrollTop = $(this).scrollTop();
+    });
+</script>
+</html>
+
+
+<head>
+    <title>妇科（早孕关爱）普通门诊</title>
+    <style>
+        #currentNumber{color:red;margin:0px 0px 0px 20px;}
+    </style>
+    
+    <script>
+        $(function () {
+            var isPageHide = false;
+            window.addEventListener('pageshow', function () {
+                if (isPageHide) {
+                    window.location.reload();
+                }
+            });
+            window.addEventListener('pagehide', function () {
+                isPageHide = true;
+            });
+        })
+    </script>
+    <script src="/gh/js/dialog/lib/zepto.min.js"></script>
+    <script src="/gh/js/dialog/js/dialog.min.js"></script>
+    <link rel="stylesheet" href="/gh/js/dialog/css/dialog.css" type="text/css" media="all">
+</head>
+<body>
+<div id="content">
+    <div id="backpage">
+        <div onclick="window.history.back(-1)">
+            <img src="/gh/images/backpage1.png" >
+            <span> 返回</span>
+        </div>
+    </div>
+    
+    
+        <div class="opr-bar ">
+            
+            <div class="opr prev">
+                
+                    
+                    
+                        <img id="opr_bar_img_prev" src="/gh/images/prev_grey.png">
+                    
+                
+
+            </div>
+            
+            <div class="days-wrap">
+                <div class="days">
+                    
+                        
+                        
+                        
+                    <span class="day  "
+                          data-val="2026-01-15">
+                        <span class="date">
+                                四
+                        </span>
+                         <span class="weekday">
+                            15
+                        </span>
+                    </span>
+                    
+                        
+                        
+                        
+                    <span class="day  "
+                          data-val="2026-01-16">
+                        <span class="date">
+                                五
+                        </span>
+                         <span class="weekday">
+                            16
+                        </span>
+                    </span>
+                    
+                        
+                        
+                        
+                    <span class="day cur "
+                          data-val="2026-01-17">
+                        <span class="date">
+                                六
+                        </span>
+                         <span class="weekday">
+                            17
+                        </span>
+                    </span>
+                    
+                        
+                        
+                        
+                    <span class="day  "
+                          data-val="2026-01-18">
+                        <span class="date">
+                                日
+                        </span>
+                         <span class="weekday">
+                            18
+                        </span>
+                    </span>
+                    
+                        
+                        
+                        
+                    <span class="day  "
+                          data-val="2026-01-19">
+                        <span class="date">
+                                一
+                        </span>
+                         <span class="weekday">
+                            19
+                        </span>
+                    </span>
+                    
+                        
+                        
+                        
+                    <span class="day  "
+                          data-val="2026-01-20">
+                        <span class="date">
+                                二
+                        </span>
+                         <span class="weekday">
+                            20
+                        </span>
+                    </span>
+                    
+                        
+                        
+                        
+                    <span class="day  "
+                          data-val="2026-01-21">
+                        <span class="date">
+                                三
+                        </span>
+                         <span class="weekday">
+                            21
+                        </span>
+                    </span>
+                    
+                        
+                        
+                        
+                    <span class="day  "
+                          data-val="2026-01-22">
+                        <span class="date">
+                                四
+                        </span>
+                         <span class="weekday">
+                            22
+                        </span>
+                    </span>
+                    
+                        
+                        
+                        
+                    <span class="day  "
+                          data-val="2026-01-23">
+                        <span class="date">
+                                五
+                        </span>
+                         <span class="weekday">
+                            23
+                        </span>
+                    </span>
+                    
+                        
+                        
+                        
+                    <span class="day  "
+                          data-val="2026-01-24">
+                        <span class="date">
+                                六
+                        </span>
+                         <span class="weekday">
+                            24
+                        </span>
+                    </span>
+                    
+                        
+                        
+                        
+                    <span class="day  "
+                          data-val="2026-01-25">
+                        <span class="date">
+                                日
+                        </span>
+                         <span class="weekday">
+                            25
+                        </span>
+                    </span>
+                    
+                        
+                        
+                        
+                    <span class="day  "
+                          data-val="2026-01-26">
+                        <span class="date">
+                                一
+                        </span>
+                         <span class="weekday">
+                            26
+                        </span>
+                    </span>
+                    
+                        
+                        
+                        
+                    <span class="day  "
+                          data-val="2026-01-27">
+                        <span class="date">
+                                二
+                        </span>
+                         <span class="weekday">
+                            27
+                        </span>
+                    </span>
+                    
+                        
+                        
+                        
+                    <span class="day  "
+                          data-val="2026-01-28">
+                        <span class="date">
+                                三
+                        </span>
+                         <span class="weekday">
+                            28
+                        </span>
+                    </span>
+                    
+                        
+                        
+                        
+                    <span class="day  "
+                          data-val="2026-01-29">
+                        <span class="date">
+                                四
+                        </span>
+                         <span class="weekday">
+                            29
+                        </span>
+                    </span>
+                    
+                </div>
+            </div>
+            
+            <div class="opr next">
+                
+                    
+                    
+                        <img id="opr_bar_img_next" src="/gh/images/next.png">
+                    
+                
+            </div>
+            
+        </div>
+        <div class="loading hidden">拼命加载中......</div>
+        
+        
+            <div id="currentNumber"></div>
+        
+        <div class="remark_red">
+            
+        </div>
+        
+        <div class="expert_type">
+            <div class="reg-day-type  cur"
+                 id="expert_AM" data-val="上午">
+                上午
+            </div>
+            <div class="reg-day-type  "
+                 id="expert_PM" data-val="下午">
+                下午
+            </div>
+        </div>
+        <div class="expert_chose">
+            
+            
+                <table>
+                    <tr>
+                        <td style="width: 300px">时段</td>
+                        <td style="width: 150px">总号</td>
+                        <td style="width: 150px">余号</td>
+                        <td style="width: 150px">挂号</td>
+                    </tr>
+                    
+                        <tr>
+                            <td><span class="startTime">08:00</span>-<span
+                                    class="endTime">08:30</span>
+                            </td>
+                            <td>4</td>
+                            <td>0</td>
+                            <td>
+                                
+                            <span class="reg_yy_btn unclick"
+                                  startTime="08:00" endTime="08:30">已满</span>
+                                
+                                
+                            </td>
+                        </tr>
+                    
+                        <tr>
+                            <td><span class="startTime">08:30</span>-<span
+                                    class="endTime">09:00</span>
+                            </td>
+                            <td>5</td>
+                            <td>0</td>
+                            <td>
+                                
+                            <span class="reg_yy_btn unclick"
+                                  startTime="08:30" endTime="09:00">已满</span>
+                                
+                                
+                            </td>
+                        </tr>
+                    
+                        <tr>
+                            <td><span class="startTime">09:00</span>-<span
+                                    class="endTime">09:30</span>
+                            </td>
+                            <td>5</td>
+                            <td>0</td>
+                            <td>
+                                
+                            <span class="reg_yy_btn unclick"
+                                  startTime="09:00" endTime="09:30">已满</span>
+                                
+                                
+                            </td>
+                        </tr>
+                    
+                        <tr>
+                            <td><span class="startTime">09:30</span>-<span
+                                    class="endTime">10:00</span>
+                            </td>
+                            <td>4</td>
+                            <td>0</td>
+                            <td>
+                                
+                            <span class="reg_yy_btn unclick"
+                                  startTime="09:30" endTime="10:00">已满</span>
+                                
+                                
+                            </td>
+                        </tr>
+                    
+                        <tr>
+                            <td><span class="startTime">10:00</span>-<span
+                                    class="endTime">10:30</span>
+                            </td>
+                            <td>4</td>
+                            <td>0</td>
+                            <td>
+                                
+                            <span class="reg_yy_btn unclick"
+                                  startTime="10:00" endTime="10:30">已满</span>
+                                
+                                
+                            </td>
+                        </tr>
+                    
+                        <tr>
+                            <td><span class="startTime">10:30</span>-<span
+                                    class="endTime">11:00</span>
+                            </td>
+                            <td>4</td>
+                            <td>3</td>
+                            <td>
+                                
+                                
+                            <span class="reg_yy_btn"
+                                  startTime="10:30" endTime="11:00"
+                                  adviceStartFetchTime="10:00"
+                                  adviceEndFetchTime="10:30">挂号</span>
+                                
+                            </td>
+                        </tr>
+                    
+                        <tr>
+                            <td><span class="startTime">11:00</span>-<span
+                                    class="endTime">11:30</span>
+                            </td>
+                            <td>4</td>
+                            <td>4</td>
+                            <td>
+                                
+                                
+                            <span class="reg_yy_btn"
+                                  startTime="11:00" endTime="11:30"
+                                  adviceStartFetchTime="10:30"
+                                  adviceEndFetchTime="11:00">挂号</span>
+                                
+                            </td>
+                        </tr>
+                    
+                </table>
+            
+        </div>
+
+        <form action='/gh/register/register.ha' method='post' name='formReg'>
+            <input type="hidden" class="hospName" name="hospName" value="苏州市妇幼保健院">
+            <input type="hidden" class="departName" name="departName" value="妇科（早孕关爱）普通门诊">
+            <input type="hidden" class="workDateIn" name="workDate">
+            <input type="hidden" class="workTypeIn" name="workType">
+            <input type="hidden" class="beginTimeIn" name="beginTime">
+            <input type="hidden" class="endTimeIn" name="endTime">
+            <input type="hidden" class="adviceStartFetchTime" name="adviceStartFetchTime">
+            <input type="hidden" class="adviceEndFetchTime" name="adviceEndFetchTime">
+            <input type="hidden" class="regType" name="regType">
+        </form>
+    
+
+</div>
+</body>
+<script>
+    function waitreg() {
+        let hospname = $(".isFullSchedule").attr("hospname");
+        let departname = $(".isFullSchedule").attr("departname");
+        let doctorname = $(".isFullSchedule").attr("doctorname");
+        let workdate = $(".isFullSchedule").attr("workdate");
+        let worktype = $(".isFullSchedule").attr("worktype");
+        // console.log(hospname + ", " + departname + ", " + doctorname + ", " + workdate + ", " + worktype);
+        var confirmHTML = "<div style='text-align: left;'>"
+            +   "<p>　  提醒：提交候补后如果有其他用户退号，则将按<span style='color: red; font-weight: bold;'>候补顺序</span>自动为您预约！</p>"
+            + "</div>"
+            + "<div style='text-align: left;'>"
+            +    "<p>　  因退号行为为用户自我控制，退号数量并不确定，所以该功能并不一定可以帮您候补到号</p>"
+            +    "<p>　  <span style='color: red; font-weight: bold;'>具体步骤：</span>点击按钮后确定则进入候补队列<span style='font-weight: bold;'>等待其他用户退号后入成功预约则将会发送短信提醒您。</span></p>"
+            + "</div><br>"
+        
+        $(document).dialog({
+            type : "confirm",
+            style: "ios",
+            titleText: "提示",
+            content: confirmHTML,
+            buttonTextConfirm: "确定",
+            buttonTextCancel: "取消",
+            onClickConfirmBtn: function() {
+                console.log("click true");
+                $('.workDateIn').val(workdate);
+                $('.workTypeIn').val(worktype);
+                $('.beginTimeIn').val(null);
+                $('.endTimeIn').val(null);
+                $('.adviceStartFetchTime').val(null);
+                $('.adviceEndFetchTime').val(null);
+                $('.regType').val("waitReg");
+                document.formReg.submit();
+            },
+            onClickCancelBtn: function() {
+                // console.log("click fasle");
+            },
+            onClickCloseBtn: function() {
+                // console.log("click close");
+            }
+        });
+    }
+
+    $(".opr.next").click(function () {
+        $(".opr-bar").addClass("has-prev");
+    });
+
+    $(".opr.prev").click(function () {
+        $(".opr-bar").removeClass("has-prev");
+    });
+    //选择时间
+    $("body").on("click", ".days .day", function () {
+        if ($(this).hasClass("unclick")) {
+            return;
+        }
+        $('.days .day').removeClass("cur");
+        $(this).addClass('cur');
+        var hospName = $('.hospName').val();
+        var departName = $('.departName').val();
+        var workDate = $(this).attr('data-val');
+        var workType = $('.reg-day-type.cur').attr('data-val');
+        $('#currentNumber').addClass("hidden");
+        $('.remark_red').addClass("hidden");
+        $('.expert_chose').addClass("hidden");
+        $('.reg-day-type').addClass("hidden");
+        $('.loading').removeClass("hidden");
+        $.ajax({
+            type: "POST",
+            url: "/gh/register/normalPoolAjax.ha",
+            data: 'hospName=' + hospName + "&departName=" + departName + "&workDate=" + workDate + "&workType=" + workType,
+            dataType: 'json',
+            success: function (data) {
+                if(data.isToday == true){
+                    if(data.isQueueAble == false){
+                        $('#currentNumber').html("当前就诊号:暂不支持");
+                    }else{
+                        if(data.currentNumber == null || data.currentNumber == "" ){
+                            $('#currentNumber').html("当前就诊号:暂无数据");
+                        }else{
+                            $('#currentNumber').html("当前就诊号:"+data.currentNumber);
+                        }
+                    }
+                    $('#currentNumber').removeClass("hidden");
+                }
+
+                if (data.remark != null) {
+                    $('.remark_red').html(data.remark);
+                }
+                if (data.isFullSchedule == true) {
+                    $('.isFullSchedule').removeClass("hidden");
+                    $('.isFullSchedule').attr("hospname", data.hospName);
+                    $('.isFullSchedule').attr("departname", data.departName);
+                    $('.isFullSchedule').attr("workdate", data.workDate);
+                    $('.isFullSchedule').attr("worktype", data.workType);
+                } else {
+                    $('.isFullSchedule').addClass("hidden");
+                }
+                if (data.isAllowWait == true) {
+                    $('.allowWait').removeClass("hidden");
+                    $('.notAllowWait').addClass("hidden");
+                } else {
+                    $('.allowWait').addClass("hidden");
+                    $('.notAllowWait').removeClass("hidden");
+                }
+                $('.reg-day-type').removeClass('unclick');
+                $('.reg-day-type').removeClass('cur');
+                if (data.workType == "上午") {
+                    $('#expert_AM').addClass('cur');
+                } else {
+                    $('#expert_PM').addClass('cur');
+                }
+                if (!data.amStatus) {
+                    $('#expert_AM').addClass('unclick');
+                }
+                if (!data.pmStatus) {
+                    $('#expert_PM').addClass('unclick');
+                }
+                var expert = "";
+                if(data.poolList.length == 0){
+                    if(undefined != data.fullPoolSchedule && data.fullPoolSchedule.length > 0){
+                        expert = "<div style='color: red;'>该科室当前普通号排班号源已满,</br>请更换上下午或者日期查询!</div>";
+                    }else{
+                        expert = "<div style='color: red;'>该科室当天暂无可用号源，</br>请更换日期查询</div>";
+                    }
+
+                }else{
+                     expert = '<table>' +
+                            '<tr>' +
+                            '<td style="width: 300px">时段</td>' +
+                            '<td style="width: 150px">总号</td>' +
+                            '<td style="width: 150px">余号</td>' +
+                            '<td style="width: 150px">挂号</td>' +
+                            '</tr>';
+                    $.each(data.poolList, function (i, pool) {
+                        expert = expert + '<tr>' +
+                                '<td><span class="startTime">' + pool.startTime + '</span>-<span class="endTime">' + pool.endTime + '</span>' +
+                                '</td>' +
+                                '<td>' + pool.totalNum + '</td>' +
+                                '<td>' + pool.leftNum + '</td>' +
+                                '<td>' +
+                                '<span class="reg_yy_btn';
+                        if (pool.leftNum == 0) {
+                            expert = expert + ' unclick' +
+                                    '"startTime="' + pool.startTime + '" endTime="' + pool.endTime + '">已满</span>' +
+                                    '</td>' +
+                                    '</tr>';
+                        } else {
+                            expert = expert +
+                                    '"startTime="' + pool.startTime + '" endTime="' + pool.endTime +
+                                    '" adviceStartFetchTime="' + pool.adviceStartFetchTime +
+                                    '" adviceEndFetchTime="' + pool.adviceEndFetchTime +
+                                    '">挂号</span>' +
+                                    '</td>' +
+                                    '</tr>';
+                        }
+                    });
+                    expert = expert + "</table>";
+
+                }
+
+
+
+                $('.expert_chose').html(expert);
+                $('.remark_red').removeClass("hidden");
+                $('.expert_chose').removeClass("hidden");
+                $('.reg-day-type').removeClass("hidden");
+                $('.loading').addClass("hidden");
+            }
+        })
+
+    });
+    $("body").on("click", ".reg_yy_btn", function () {
+        if ($(this).hasClass('unclick')) {
+            return;
+        }
+
+        $(".reg_yy_btn").addClass('unclick');
+
+//        var hospName = $('.hospName').val();
+//        var departName = $('.departName').val();
+//        var doctorName = $('.doctorName').val();
+        var workDate = $('.day.cur').attr('data-val')
+        var workType = $('.reg-day-type.cur').attr('data-val')
+        var beginTime = $(this).attr("startTime");
+        var endTime = $(this).attr("endTime");
+        var adviceStartFetchTime = $(this).attr("adviceStartFetchTime");
+        var adviceEndFetchTime = $(this).attr("adviceEndFetchTime");
+        $('.workDateIn').val(workDate);
+        $('.workTypeIn').val(workType);
+        $('.beginTimeIn').val(beginTime);
+        $('.endTimeIn').val(endTime);
+        $('.adviceStartFetchTime').val(adviceStartFetchTime);
+        $('.adviceEndFetchTime').val(adviceEndFetchTime);
+        $('.regType').val("");
+        document.formReg.submit();
+    });
+    $("body").on("click", ".reg-day-type", function () {
+        if ($(this).hasClass('unclick')) {
+            alert("没有排班");
+            return;
+        }
+        $('reg-day-type').removeClass("cur");
+        $(this).addClass('cur');
+        var hospName = $('.hospName').val();
+        var departName = $('.departName').val();
+        var workDate = $('.day.cur').attr('data-val');
+        var workType = $(this).attr('data-val');
+        $('.remark_red').addClass("hidden");
+        $('.expert_chose').addClass("hidden");
+        $('.reg-day-type').addClass("hidden");
+        $('.loading').removeClass("hidden");
+        $('#currentNumber').addClass("hidden");
+        $.ajax({
+            type: "POST",
+            url: "/gh/register/normalPoolAjax.ha",
+            data: 'hospName=' + hospName + "&departName=" + departName + "&workDate=" + workDate + "&workType=" + workType,
+            dataType: 'json',
+            success: function (data) {
+                if(data.isToday == true){
+                    if(data.isQueueAble == false){
+                        $('#currentNumber').html("当前就诊号:暂不支持");
+                    }else{
+                        if(data.currentNumber == null || data.currentNumber == "" ){
+                            $('#currentNumber').html("当前就诊号:暂无数据");
+                        }else{
+                            $('#currentNumber').html("当前就诊号:"+data.currentNumber);
+                        }
+                    }
+                    $('#currentNumber').removeClass("hidden");
+                }
+                $('.remark_red').html('');
+                $('.expert_chose').html('');
+                if (data.remark != null) {
+                    $('.remark_red').html(data.remark);
+                }
+                if (data.isFullSchedule == true) {
+                    $('.isFullSchedule').removeClass("hidden");
+                    $('.isFullSchedule').attr("hospname", data.hospName);
+                    $('.isFullSchedule').attr("departname", data.departName);
+                    $('.isFullSchedule').attr("workdate", data.workDate);
+                    $('.isFullSchedule').attr("worktype", data.workType);
+                } else {
+                    $('.isFullSchedule').addClass("hidden");
+                }
+                if (data.isAllowWait == true) {
+                    $('.allowWait').removeClass("hidden");
+                    $('.notAllowWait').addClass("hidden");
+                } else {
+                    $('.allowWait').addClass("hidden");
+                    $('.notAllowWait').removeClass("hidden");
+                }
+                $('.reg-day-type').removeClass('unclick');
+                $('.reg-day-type').removeClass('cur');
+                if (data.workType == "上午") {
+                    $('#expert_AM').addClass('cur');
+                } else {
+                    $('#expert_PM').addClass('cur');
+                }
+                if (!data.amStatus) {
+                    $('#expert_AM').addClass('unclick');
+                }
+                if (!data.pmStatus) {
+                    $('#expert_PM').addClass('unclick');
+                }
+                var expert = "";
+                if(data.poolList.length == 0){
+                    if(undefined != data.fullPoolSchedule && data.fullPoolSchedule.length > 0){
+                        expert = "<div style='color: red;'>该科室当前普通号排班号源已满,</br>请更换上下午或者日期查询!</div>";
+                    }else{
+                        expert = "<div style='color: red;'>该科室当天暂无可用号源，</br>请更换日期查询</div>";
+                    }
+
+                }else{
+                    expert = '<table>' +
+                            '<tr>' +
+                            '<td style="width: 300px">时段</td>' +
+                            '<td style="width: 150px">总号</td>' +
+                            '<td style="width: 150px">余号</td>' +
+                            '<td style="width: 150px">挂号</td>' +
+                            '</tr>';
+                    $.each(data.poolList, function (i, pool) {
+                        expert = expert + '<tr>' +
+                                '<td><span class="startTime">' + pool.startTime + '</span>-<span class="endTime">' + pool.endTime + '</span>' +
+                                '</td>' +
+                                '<td>' + pool.totalNum + '</td>' +
+                                '<td>' + pool.leftNum + '</td>' +
+                                '<td>' +
+                                '<span class="reg_yy_btn';
+                        if (pool.leftNum == 0) {
+                            expert = expert + ' unclick' +
+                                    '"startTime="' + pool.startTime + '" endTime="' + pool.endTime + '">已满</span>' +
+                                    '</td>' +
+                                    '</tr>';
+                        } else {
+                            expert = expert +
+                                    '"startTime="' + pool.startTime + '" endTime="' + pool.endTime +
+                                    '" adviceStartFetchTime="' + pool.adviceStartFetchTime +
+                                    '" adviceEndFetchTime="' + pool.adviceEndFetchTime +
+                                    '">挂号</span>' +
+                                    '</td>' +
+                                    '</tr>';
+                        }
+                    });
+                    expert = expert + "</table>";
+
+                }
+                $('.expert_chose').html(expert);
+                $('.remark_red').removeClass("hidden");
+                $('.expert_chose').removeClass("hidden");
+                $('.reg-day-type').removeClass("hidden");
+                $('.loading').addClass("hidden");
+            }
+        })
+    })
+
+    $(".opr.next").click(function () {
+
+        $("#opr_bar_img_prev").attr("src","/gh/images/prev.png");
+        $("#opr_bar_img_next").attr("src","/gh/images/next_grey.png");
+//            alert("test");
+        $(".opr-bar").addClass("has-prev");
+
+    });
+    $(".opr.prev").click(function () {
+        $("#opr_bar_img_prev").attr("src","/gh/images/prev_grey.png");
+        $("#opr_bar_img_next").attr("src","/gh/images/next.png");
+//            alert("test");
+        $(".opr-bar").removeClass("has-prev");
+
+    });
+</script>
+</html>

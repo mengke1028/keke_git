@@ -14,6 +14,7 @@ try:
         # 生成激活码
         for _ in range(code_count):
             activation_code = ''.join(random.choice(characters) for _ in range(code_length))
+            print(activation_code)
             file.write(activation_code + '\n')
     print("激活码已成功保存到 activation_codes.txt 文件中。")
 except Exception as e:

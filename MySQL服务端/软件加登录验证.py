@@ -9,7 +9,7 @@ import time
 
 class MySQLDatabase:
     def __init__(self):
-        self.host = '106.54.233.105'
+        self.host = '43.136.80.203'
         self.database = 'keke_test'
         self.user = 'keke'
         self.password = 'mengke1028..'
@@ -75,9 +75,11 @@ class MySQLDatabase:
     def query_by_activation_code(self, activation_code):
         """根据 activation_code 查询记录"""
         query = "SELECT * FROM activation_codes WHERE activation_code = %s"
+
         values = (activation_code,)
         if self.connection:
             cursor = self.connection.cursor()
+            print(cursor)
             try:
                 cursor.execute(query, values)
                 result = cursor.fetchall()

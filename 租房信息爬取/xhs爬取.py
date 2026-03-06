@@ -39,9 +39,8 @@ data = {"keyword":"相城魅力花园租房","page":1,"page_size":20,"search_id"
 with open('租房信息.csv', 'w', newline="", encoding='utf-8') as csvfile:
     writer = csv.writer(csvfile)
     writer.writerow(["title", "date", "url"])
-    for i in range(1, 6):
+    for i in range(1, 10):
         data['page'] = i
-        print(data)
         res = requests.post(url=urls, headers=headers, json=data)
 
         datas = res.json()
